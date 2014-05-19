@@ -1,10 +1,13 @@
-#include <iostream>
+#include <QCoreApplication>
 
-using namespace std;
+#include "outputwriter.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    cout << "Hello World!" << endl;
-    return 0;
+    QCoreApplication a(argc, argv);
+    // Test outputwriter
+    OutputWriter writer("test.out");
+    QVector<DataRow> data{DataRow(1, 0.5)};
+    writer.write(data);
+    //return a.exec(); // For now we don't need the event loop, only necessary for threads, signal/slots, timers, etc.
 }
-
