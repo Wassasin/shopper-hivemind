@@ -9,6 +9,8 @@ typedef quint32 OfferId;
 typedef quint32 MarketId;
 typedef quint32 CompanyId;
 typedef quint32 BrandId;
+typedef quint32 DeptId;
+typedef quint32 CategoryId;
 typedef float Probability;
 
 #endif // CONSTANTS_H

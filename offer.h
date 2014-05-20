@@ -4,18 +4,18 @@
 struct Offer {
 
     OfferId offer;
-    QString category;
+    CategoryId category;
     int quantity;
     CompanayId company;
-    int value;
+    int offerValue;
     BrandId brand;
 
-    Offer(OfferId offer, QString category, int quantity, CompanyId company, int value, BrandId brand) {
+    Offer(OfferId offer, CategoryId category, int quantity, CompanyId company, int offerValue, BrandId brand) {
         this->offer = offer;
         this->category = category;
         this->quantity = quantity;
         this->company = company;
-        this->value = value;
+        this->offerValue = offerValue;
         this->brand = brand;
     }
 

@@ -7,8 +7,8 @@ struct Transaction {
 
     ShopperId id;
     ChainId chain;
-    QString dept;
-    QString category;
+    DeptId dept;
+    CategoryId category;
     CompanyId company;
     BrandId brand;
     QDate date;
@@ -17,7 +17,7 @@ struct Transaction {
     int purchaseQuantity;
     int purchaseAmount;
 
-    Transaction(ShopperId id, ChainId chain, QString dept, QString category, CompanyId company, BrandId brand, QDate date, int productSize, QString productMeasure, int purchaseQuantity, int purchaseAmount) {
+    Transaction(ShopperId id, ChainId chain, DeptId dept, CategoryId category, CompanyId company, BrandId brand, QDate date, int productSize, QString productMeasure, int purchaseQuantity, int purchaseAmount) {
         this->id = id;
         this->chain = chain;
         this->dept = dept;
