@@ -1,16 +1,16 @@
-#include "csv_parser.h"
+#include "csvparser.h"
 
 #include <stdexcept>
 #include <boost/tokenizer.hpp>
 
 namespace Hivemind {
 
-	csv_parser::csv_parser(std::istream& s)
+	CsvParser::CsvParser(std::istream& s)
 	: m_s(s)
 	{
 	}
 
-	bool csv_parser::read_line(std::vector<std::string>& result)
+	bool CsvParser::readLine(std::vector<std::string>& result)
 	{
 		const static boost::char_separator<char> sep(",", "", boost::keep_empty_tokens);
 

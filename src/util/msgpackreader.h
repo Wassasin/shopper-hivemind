@@ -12,15 +12,15 @@
 namespace Hivemind
 {
 	template<typename T>
-	class msgpack_reader
+	class MsgpackReader
 	{
 		std::ifstream m_fi;
 		boost::iostreams::filtering_istream m_si;
 		msgpack::unpacker m_pac;
 		std::auto_ptr<msgpack::zone> m_zone;
 
-		msgpack_reader(const msgpack_reader&) = delete;
-		msgpack_reader& operator=(const msgpack_reader&) = delete;
+		MsgpackReader(const MsgpackReader&) = delete;
+		MsgpackReader& operator=(const MsgpackReader&) = delete;
 
 		bool consume()
 		{
@@ -37,7 +37,7 @@ namespace Hivemind
 
 	public:
 
-		msgpack_reader(std::string filename)
+		MsgpackReader(std::string filename)
 		: m_fi(filename, std::ios_base::binary)
 		, m_si()
 		, m_pac()
@@ -47,7 +47,7 @@ namespace Hivemind
 			m_si.push(m_fi);
 		}
 
-		~msgpack_reader()
+		~MsgpackReader()
 		{
 			boost::iostreams::close(m_si);
 			m_fi.close();

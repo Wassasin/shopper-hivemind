@@ -3,9 +3,9 @@
 #include <string>
 #include <boost/filesystem.hpp>
 
-#include "csv_reader.h"
-#include "msgpack_reader.h"
-#include "msgpack_writer.h"
+#include "csvreader.h"
+#include "msgpackreader.h"
+#include "msgpackwriter.h"
 
 #include "../offer.h"
 #include "../transaction.h"
@@ -23,8 +23,8 @@ namespace Hivemind {
 		template<typename T>
 		static void csvToMsgpack(const std::string& csvFilename, const std::string& msgpackFilename)
 		{
-			msgpack_writer<T> w(msgpackFilename);
-			csv_reader<T> r(csvFilename);
+			MsgpackWriter<T> w(msgpackFilename);
+			CsvReader<T> r(csvFilename);
 
 			T x;
 			while(r.read(x))
@@ -57,7 +57,7 @@ namespace Hivemind {
 
 			{
 				Offer o;
-				msgpack_reader<Offer> r("../data/offers.msgpack.gz");
+				MsgpackReader<Offer> r("../data/offers.msgpack.gz");
 				while(r.read(o))
 					offers.insert(std::make_pair(o.id, o));
 			}
@@ -67,7 +67,7 @@ namespace Hivemind {
 			std::map<Id, TrainHistory> clients;
 			{
 				TrainHistory th;
-				msgpack_reader<TrainHistory> r("../data/trainHistory.msgpack.gz");
+				MsgpackReader<TrainHistory> r("../data/trainHistory.msgpack.gz");
 				while(r.read(th))
 					clients.insert(std::make_pair(th.h.id, th));
 			}
@@ -76,8 +76,8 @@ namespace Hivemind {
 
 			{
 				Transaction t;
-				msgpack_writer<TrainHistory> w("../data/trainHistory_merged.msgpack.gz");
-				msgpack_reader<Transaction> r("../data/transactions.msgpack.gz");
+				MsgpackWriter<TrainHistory> w("../data/trainHistory_merged.msgpack.gz");
+				MsgpackReader<Transaction> r("../data/transactions.msgpack.gz");
 
 				Id past_id;
 				TrainHistory th;

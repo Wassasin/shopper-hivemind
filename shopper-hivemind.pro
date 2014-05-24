@@ -14,31 +14,31 @@ QMAKE_CXXFLAGS_DEBUG += -fno-inline
 CONFIG += debug_and_release
 
 SOURCES += src/main.cpp \
-    src/util/csv_parser.cpp \
 	src/transaction.cpp \
     src/offer.cpp \
     src/history.cpp \
 	src/typedefs.cpp \
 	src/datarow.cpp \
-	src/outputwriter.cpp
+	src/outputwriter.cpp \
+    src/util/csvparser.cpp
 
 linux: INCLUDEPATH += /usr/include/msgpack
 INCLUDEPATH += /usr/include/qt5/QtCore
 INCLUDEPATH += /usr/include/qt5
 
 HEADERS += \
-    src/util/csv_parser.h \
     src/transaction.h \
     src/typedefs.h \
 	src/util/convertor.h \
-	src/util/csv_reader.h \
-	src/util/msgpack_writer.h \
-	src/util/msgpack_reader.h \
 	src/productmeasure.h \
 	src/offer.h \
 	src/history.h \
 	src/datarow.h \
-	src/outputwriter.h
+	src/outputwriter.h \
+    src/util/msgpackwriter.h \
+    src/util/msgpackreader.h \
+    src/util/csvreader.h \
+    src/util/csvparser.h
 
 LIBS += \
   -lboost_date_time \

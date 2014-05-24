@@ -6,23 +6,23 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
-#include "csv_parser.h"
+#include "csvparser.h"
 
 namespace Hivemind
 {
 	template<typename T>
-	class csv_reader
+	class CsvReader
 	{
 		std::ifstream m_fi;
 		boost::iostreams::filtering_istreambuf m_si;
 		std::istream m_sia;
-		csv_parser m_parser;
+		CsvParser m_parser;
 
-		csv_reader(const csv_reader&) = delete;
-		csv_reader& operator=(const csv_reader&) = delete;
+		CsvReader(const CsvReader&) = delete;
+		CsvReader& operator=(const CsvReader&) = delete;
 
 	public:
-		csv_reader(std::string filename, bool skip_first = true)
+		CsvReader(std::string filename, bool skip_first = true)
 		: m_fi(filename, std::ios_base::binary)
 		, m_si()
 		, m_sia(&m_si)
@@ -34,11 +34,11 @@ namespace Hivemind
 			if(skip_first)
 			{
 				std::vector<std::string> nop;
-				m_parser.read_line(nop);
+				m_parser.readLine(nop);
 			}
 		}
 
-		~csv_reader()
+		~CsvReader()
 		{
 			boost::iostreams::close(m_si);
 			m_fi.close();
@@ -47,7 +47,7 @@ namespace Hivemind
 		bool read(T& x_ref)
 		{
 			std::vector<std::string> line;
-			if(!m_parser.read_line(line))
+			if(!m_parser.readLine(line))
 				return false;
 
 			x_ref = T::from_line(line);

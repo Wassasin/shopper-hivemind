@@ -10,17 +10,17 @@
 namespace Hivemind
 {
 	template<typename T>
-	class msgpack_writer
+	class MsgpackWriter
 	{
 		std::ofstream m_fo;
 		boost::iostreams::filtering_ostream m_so;
 		msgpack::packer<std::ostream> m_pac;
 
-		msgpack_writer(const msgpack_writer&) = delete;
-		msgpack_writer& operator=(const msgpack_writer&) = delete;
+		MsgpackWriter(const MsgpackWriter&) = delete;
+		MsgpackWriter& operator=(const MsgpackWriter&) = delete;
 
 	public:
-		msgpack_writer(std::string filename)
+		MsgpackWriter(std::string filename)
 		: m_fo(filename, std::ios_base::binary)
 		, m_so()
 		, m_pac(&m_so)
@@ -29,7 +29,7 @@ namespace Hivemind
 			m_so.push(m_fo);
 		}
 
-		~msgpack_writer()
+		~MsgpackWriter()
 		{
 			// Closing the buffers in order is very important (UB)
 			boost::iostreams::close(m_so);
