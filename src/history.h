@@ -7,33 +7,33 @@
 #include "typedefs.h"
 #include "transaction.h"
 
-namespace hivemind
+namespace Hivemind
 {
-	class history
+	class History
 	{
 	public:
-		id_t id;
-		id_t chain;
-		id_t offer;
-		id_t market;
-		date_t offerdate;
+		Id id;
+		Id chain;
+		Id offer;
+		Id market;
+		Date offerdate;
 
-		std::multimap<date_t, transaction> transactions;
+		std::multimap<Date, Transaction> transactions;
 
-		static history from_line(const std::vector<std::string>& line);
+		static History from_line(const std::vector<std::string>& line);
 
 		// Macro for serialization
 		MSGPACK_DEFINE(id, chain, offer, market, offerdate, transactions);
 	};
 
-	class train_history
+	class TrainHistory
 	{
 	public:
-		history h;
+		History h;
 		uint64_t repeattrips;
 		bool repeater;
 
-		static train_history from_line(const std::vector<std::string>& line);
+		static TrainHistory from_line(const std::vector<std::string>& line);
 
 		// Macro for serialization
 		MSGPACK_DEFINE(h, repeattrips, repeater);

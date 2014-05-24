@@ -11,20 +11,20 @@
 #include "../transaction.h"
 #include "../history.h"
 
-namespace hivemind {
+namespace Hivemind {
 
-	class convertor
+	class Convertor
 	{
-		convertor() = delete;
-		convertor(const convertor&) = delete;
-		convertor& operator=(const convertor&) = delete;
+		Convertor() = delete;
+		Convertor(const Convertor&) = delete;
+		Convertor& operator=(const Convertor&) = delete;
 
 	public:
 		template<typename T>
-		static void csv_to_msgpack(const std::string& csv_filename, const std::string& msgpack_filename)
+		static void csvToMsgpack(const std::string& csvFilename, const std::string& msgpackFilename)
 		{
-			msgpack_writer<T> w(msgpack_filename);
-			csv_reader<T> r(csv_filename);
+			msgpack_writer<T> w(msgpackFilename);
+			csv_reader<T> r(csvFilename);
 
 			T x;
 			while(r.read(x))
@@ -34,40 +34,40 @@ namespace hivemind {
 		template<typename T>
 		static void preprocess(const std::string& filename, const std::string& datadir)
 		{
-			const std::string file_old = datadir+filename+".csv.gz";
-			const std::string file_new = datadir+filename+".msgpack.gz";
+			const std::string fileOld = datadir+filename+".csv.gz";
+			const std::string fileNew = datadir+filename+".msgpack.gz";
 
-			if(boost::filesystem::exists(file_new))
+			if(boost::filesystem::exists(fileNew))
 			{
 				std::cerr << "Got " << filename << " from cache" << std::endl;
 				return;
 			}
 
-			if(!boost::filesystem::exists(file_old))
-				throw std::runtime_error(file_old + " does not exist.");
+			if(!boost::filesystem::exists(fileOld))
+				throw std::runtime_error(fileOld + " does not exist.");
 
 			std::cerr << "Pre-processing " << filename << std::endl;
-			convertor::csv_to_msgpack<T>(file_old, file_new);
+			Convertor::csvToMsgpack<T>(fileOld, fileNew);
 		}
 
-		static void create_dataset()
+		static void createDataset()
 		{
 			std::cerr << "Relating data..." << std::endl;
-			std::map<id_t, offer> offers;
+			std::map<Id, Offer> offers;
 
 			{
-				offer o;
-				msgpack_reader<offer> r("../data/offers.msgpack.gz");
+				Offer o;
+				msgpack_reader<Offer> r("../data/offers.msgpack.gz");
 				while(r.read(o))
 					offers.insert(std::make_pair(o.id, o));
 			}
 
 			std::cerr << "Got " << offers.size() << " offers" << std::endl;
 
-			std::map<id_t, train_history> clients;
+			std::map<Id, TrainHistory> clients;
 			{
-				train_history th;
-				msgpack_reader<train_history> r("../data/trainHistory.msgpack.gz");
+				TrainHistory th;
+				msgpack_reader<TrainHistory> r("../data/trainHistory.msgpack.gz");
 				while(r.read(th))
 					clients.insert(std::make_pair(th.h.id, th));
 			}
@@ -75,15 +75,15 @@ namespace hivemind {
 			std::cerr << "Got " << clients.size() << " clients" << std::endl;
 
 			{
-				transaction t;
-				msgpack_writer<train_history> w("../data/trainHistory_merged.msgpack.gz");
-				msgpack_reader<transaction> r("../data/transactions.msgpack.gz");
+				Transaction t;
+				msgpack_writer<TrainHistory> w("../data/trainHistory_merged.msgpack.gz");
+				msgpack_reader<Transaction> r("../data/transactions.msgpack.gz");
 
-				id_t past_id;
-				train_history th;
+				Id past_id;
+				TrainHistory th;
 				bool empty = true;
 
-				std::set<id_t> processed;
+				std::set<Id> processed;
 
 				while(r.read(t))
 				{

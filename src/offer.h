@@ -5,19 +5,19 @@
 
 #include "typedefs.h"
 
-namespace hivemind
+namespace Hivemind
 {
-	class offer
+	class Offer
 	{
 	public:
-		id_t id;
-		id_t category;
+		Id id;
+		Id category;
 		uint64_t quantity;
-		id_t company;
+		Id company;
 		float offervalue;
-		id_t brand;
+		Id brand;
 
-		static offer from_line(const std::vector<std::string>& line);
+		static Offer from_line(const std::vector<std::string>& line);
 
 		// Macro for serialization
 		MSGPACK_DEFINE(id, category, quantity, company, offervalue, brand);

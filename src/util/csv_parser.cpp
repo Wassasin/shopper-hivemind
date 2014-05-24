@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <boost/tokenizer.hpp>
 
-namespace hivemind {
+namespace Hivemind {
 
 	csv_parser::csv_parser(std::istream& s)
 	: m_s(s)

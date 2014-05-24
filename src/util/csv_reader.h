@@ -8,7 +8,7 @@
 
 #include "csv_parser.h"
 
-namespace hivemind
+namespace Hivemind
 {
 	template<typename T>
 	class csv_reader

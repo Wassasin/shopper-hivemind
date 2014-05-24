@@ -7,24 +7,24 @@
 #include "typedefs.h"
 #include "productmeasure.h"
 
-namespace hivemind {
+namespace Hivemind {
 
-	class transaction
+	class Transaction
 	{
 	public:
-		id_t id;
-		id_t chain;
-		id_t dept;
-		id_t category;
-		id_t company;
-		id_t brand;
-		date_t date;
+		Id id;
+		Id chain;
+		Id dept;
+		Id category;
+		Id company;
+		Id brand;
+		Date date;
 		float productsize;
-		productmeasure_e productmeasure;
+		Productmeasure productmeasure;
 		uint64_t purchasequantity;
 		float purchaseamount;
 
-		static transaction from_line(const std::vector<std::string>& line);
+		static Transaction from_line(const std::vector<std::string>& line);
 
 		// Macro for serialization
 		MSGPACK_DEFINE(id, chain, dept, category, company, brand, date, productsize, productmeasure, purchasequantity, purchaseamount);

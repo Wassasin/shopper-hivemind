@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-namespace hivemind {
+namespace Hivemind {
 
 	class csv_parser
 	{

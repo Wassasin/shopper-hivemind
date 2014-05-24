@@ -4,16 +4,16 @@
 #include <cstdint>
 #include <msgpack.hpp>
 
-namespace hivemind
+namespace Hivemind
 {
-	enum class productmeasure_e : std::uint8_t
+	enum class Productmeasure : std::uint8_t
 	{
 		items, CT, FT, GL, LB, LT, OZ, PT, QT, RL, YD
 	};
 
-	inline productmeasure_e productmeasure_from_string(const std::string& str)
+	inline Productmeasure toProductmeasure(const std::string& str)
 	{
-		typedef productmeasure_e pm;
+		typedef Productmeasure pm;
 
 		static const std::map<std::string, pm> mapping = {
 			{"", pm::items},
@@ -43,17 +43,17 @@ namespace hivemind
 
 namespace msgpack {
 
-	inline hivemind::productmeasure_e& operator>>(object o, hivemind::productmeasure_e& x)
+	inline Hivemind::Productmeasure& operator>>(object o, Hivemind::Productmeasure& x)
 	{
 		if(o.type != type::POSITIVE_INTEGER)
 			throw type_error();
 
-		x = (hivemind::productmeasure_e) o.via.u64;
+		x = (Hivemind::Productmeasure) o.via.u64;
 		return x;
 	}
 
 	template <typename Stream>
-	inline packer<Stream>& operator<<(packer<Stream>& o, const hivemind::productmeasure_e& x)
+	inline packer<Stream>& operator<<(packer<Stream>& o, const Hivemind::Productmeasure& x)
 	{
 		o.pack_uint8((std::uint8_t)x);
 		return o;

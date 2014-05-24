@@ -9,7 +9,7 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/operations.hpp>
 
-namespace hivemind
+namespace Hivemind
 {
 	template<typename T>
 	class msgpack_reader

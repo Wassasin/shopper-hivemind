@@ -4,18 +4,19 @@
 #include <msgpack.hpp>
 #include <boost/date_time/gregorian/greg_date.hpp>
 
-namespace hivemind {
+namespace Hivemind {
 
-	typedef uint64_t id_t;
-	typedef boost::gregorian::date date_t;
+	typedef std::uint64_t Id;
+	typedef float Probability;
+	typedef boost::gregorian::date Date;
 
-	date_t to_date(std::string str);
+	Date toDate(std::string str);
 
 }
 
 namespace msgpack {
 
-	inline hivemind::date_t& operator>>(object o, hivemind::date_t& x)
+	inline Hivemind::Date& operator>>(object o, Hivemind::Date& x)
 	{
 		uint16_t y, m, d;
 
@@ -25,13 +26,13 @@ namespace msgpack {
 		o.via.array.ptr[1].convert(&m);
 		o.via.array.ptr[2].convert(&d);
 
-		x = hivemind::date_t(y, m, d);
+		x = Hivemind::Date(y, m, d);
 
 		return x;
 	}
 
 	template <typename Stream>
-	inline packer<Stream>& operator<<(packer<Stream>& o, const hivemind::date_t& x)
+	inline packer<Stream>& operator<<(packer<Stream>& o, const Hivemind::Date& x)
 	{
 		o.pack_array(3);
 		o.pack((uint16_t)x.year());

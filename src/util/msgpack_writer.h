@@ -7,7 +7,7 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
-namespace hivemind
+namespace Hivemind
 {
 	template<typename T>
 	class msgpack_writer

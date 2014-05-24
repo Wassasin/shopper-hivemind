@@ -8,7 +8,7 @@
 
 void test()
 {
-	using namespace hivemind;
+	using namespace Hivemind;
 
 
 
@@ -32,16 +32,16 @@ void test()
 
 int main()
 {
-	using namespace hivemind;
+	using namespace Hivemind;
 
 	const std::string datadir = "../data/";
 
-	convertor::preprocess<offer>("offers", datadir);
-	convertor::preprocess<train_history>("trainHistory", datadir);
-	convertor::preprocess<history>("testHistory", datadir);
-	convertor::preprocess<transaction>("transactions", datadir);
+	Convertor::preprocess<Offer>("offers", datadir);
+	Convertor::preprocess<TrainHistory>("trainHistory", datadir);
+	Convertor::preprocess<History>("testHistory", datadir);
+	Convertor::preprocess<Transaction>("transactions", datadir);
 
-	convertor::create_dataset();
+	Convertor::createDataset();
 
 	//convertor::csv_to_msgpack<transaction>("../data/transactions.csv.gz", "../data/transactions.msgpack.gz");
 	//test();
