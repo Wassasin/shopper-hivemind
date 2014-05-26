@@ -5,6 +5,20 @@
 #include "history.h"
 #include "typedefs.h"
 
+void test()
+{
+	using namespace Hivemind;
+
+	MsgpackReader<TrainClient> r("../data/trainClients.msgpack.gz");
+	TrainClient t;
+	size_t result = 0;
+
+	while(r.read(t))
+		result += t.baskets.size();
+
+	std::cerr << result << std::endl;
+}
+
 int main()
 {
 	using namespace Hivemind;
@@ -17,6 +31,7 @@ int main()
 	Convertor::preprocess<Transaction>("transactions", datadir);
 
 	Convertor::createDataset();
+	test();
 
 	return 0;
 }

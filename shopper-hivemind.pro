@@ -1,6 +1,9 @@
 TEMPLATE = app
 CONFIG += console
 CONFIG += c++11
+CONFIG += warn_on
+CONFIG += debug_and_release
+
 CONFIG -= app_bundle
 CONFIG -= qt
 
@@ -11,7 +14,10 @@ QMAKE_LFLAGS_RELEASE -= -O1
 QMAKE_CXXFLAGS_DEBUG += -O0
 QMAKE_CXXFLAGS_DEBUG += -fno-inline
 
-CONFIG += debug_and_release
+QMAKE_CXXFLAGS_WARN_ON += -Wall
+QMAKE_CXXFLAGS_WARN_ON += -Wextra
+QMAKE_CXXFLAGS_WARN_ON += -Weffc++
+QMAKE_CXXFLAGS_WARN_ON += -pedantic
 
 SOURCES += src/main.cpp \
 	src/transaction.cpp \
@@ -22,9 +28,9 @@ SOURCES += src/main.cpp \
 	src/outputwriter.cpp \
     src/util/csvparser.cpp
 
-linux: INCLUDEPATH += /usr/include/msgpack
-INCLUDEPATH += /usr/include/qt5/QtCore
-INCLUDEPATH += /usr/include/qt5
+QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
+QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
+QMAKE_CXXFLAGS += -isystem /usr/include/qt5
 
 HEADERS += \
     src/transaction.h \
@@ -38,7 +44,8 @@ HEADERS += \
     src/util/msgpackwriter.h \
     src/util/msgpackreader.h \
     src/util/csvreader.h \
-    src/util/csvparser.h
+    src/util/csvparser.h \
+    src/client.h
 
 LIBS += \
   -lboost_date_time \

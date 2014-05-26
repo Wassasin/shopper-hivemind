@@ -17,7 +17,7 @@ namespace Hivemind
 		std::ifstream m_fi;
 		boost::iostreams::filtering_istream m_si;
 		msgpack::unpacker m_pac;
-		std::auto_ptr<msgpack::zone> m_zone;
+		std::shared_ptr<msgpack::zone> m_zone;
 
 		MsgpackReader(const MsgpackReader&) = delete;
 		MsgpackReader& operator=(const MsgpackReader&) = delete;
@@ -32,6 +32,7 @@ namespace Hivemind
 				return false;
 
 			m_pac.buffer_consumed(len);
+
 			return true;
 		}
 
@@ -40,7 +41,7 @@ namespace Hivemind
 		MsgpackReader(std::string filename)
 		: m_fi(filename, std::ios_base::binary)
 		, m_si()
-		, m_pac()
+		, m_pac(64*1024*1024) // We use large objects, which will fail to load if buffer is not big enough
 		, m_zone()
 		{
 			m_si.push(boost::iostreams::gzip_decompressor());
@@ -56,7 +57,6 @@ namespace Hivemind
 		bool read(T& x)
 		{
 			m_zone.reset(); // Destruct and release memory of previous value
-
 			msgpack::unpacked result;
 			if(!m_pac.next(&result))
 			{
@@ -67,12 +67,22 @@ namespace Hivemind
 					std::logic_error("Msgpack buffer should contain something now.");
 			}
 
-			if(m_pac.message_size() > 1024*1024)
+			msgpack::object obj = result.get();
+
+			try
+			{
+				obj.convert(&x); // Reference will live until next read call (see msgpack::zone, m_zone)
+			} catch(msgpack::type_error e)
+			{
+				throw std::runtime_error("Msgpack type problem. Might be a broken file; or that your object was too big.");
+			}
+
+			auto tmp = result.zone();
+			m_zone.reset(tmp.release()); // Yield pointer to shared_ptr, release ownership
+
+			if(m_pac.message_size() > 64*1024*1024)
 				throw std::runtime_error("Msgpack message is too large");
 
-			msgpack::object obj = result.get();
-			x = obj.as<T>(); // Reference will live until next read call (see msgpack::zone, m_zone)
-			m_zone = result.zone();
 			return true;
 		}
 	};

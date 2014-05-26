@@ -4,10 +4,9 @@ namespace Hivemind
 {
 
 	DataRow::DataRow(Id id, Probability buyProbability)
-	{
-		this->id = id;
-		this->buyProbability = buyProbability;
-	}
+	: id(id)
+	, buyProbability(buyProbability)
+	{}
 
 	Id DataRow::getId() const
 	{

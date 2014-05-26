@@ -2,6 +2,7 @@
 
 #include <string>
 #include <boost/filesystem.hpp>
+#include <boost/optional.hpp>
 
 #include "csvreader.h"
 #include "msgpackreader.h"
@@ -10,6 +11,7 @@
 #include "../offer.h"
 #include "../transaction.h"
 #include "../history.h"
+#include "../client.h"
 
 namespace Hivemind {
 
@@ -53,72 +55,75 @@ namespace Hivemind {
 		static void createDataset()
 		{
 			std::cerr << "Relating data..." << std::endl;
-			std::map<Id, Offer> offers;
 
-			{
-				Offer o;
-				MsgpackReader<Offer> r("../data/offers.msgpack.gz");
-				while(r.read(o))
-					offers.insert(std::make_pair(o.id, o));
-			}
+			std::map<Id, TrainClient> clients;
 
-			std::cerr << "Got " << offers.size() << " offers" << std::endl;
-
-			std::map<Id, TrainHistory> clients;
 			{
 				TrainHistory th;
 				MsgpackReader<TrainHistory> r("../data/trainHistory.msgpack.gz");
 				while(r.read(th))
-					clients.insert(std::make_pair(th.h.id, th));
+					clients.emplace(th.id, TrainClient(th));
 			}
 
 			std::cerr << "Got " << clients.size() << " clients" << std::endl;
 
 			{
-				Transaction t;
-				MsgpackWriter<TrainHistory> w("../data/trainHistory_merged.msgpack.gz");
+				Transaction tr;
+				MsgpackWriter<TrainClient> w("../data/trainClients.msgpack.gz");
 				MsgpackReader<Transaction> r("../data/transactions.msgpack.gz");
 
-				Id past_id;
-				TrainHistory th;
-				bool empty = true;
+				boost::optional<TrainClient> tc;
+				boost::optional<Basket> b;
 
 				std::set<Id> processed;
 
-				while(r.read(t))
+				while(r.read(tr))
 				{
 					// We've suddenly got a different client to work on
-					if(past_id != t.id)
+					if(tc && tc->id != tr.id)
 					{
 						// Write the old client to file
-						if(!empty)
-						{
-							w.write(th);
-							processed.insert(past_id);
-							clients.erase(past_id);
-							empty = true;
-						}
+						w.write(*tc);
+						processed.insert(tc->id);
+						clients.erase(tc->id);
+						tc.reset();
+						b.reset();
+					}
 
+					if(!tc)
+					{
 						// Does this transaction belong to a client we know?
-						past_id = t.id;
-						auto it = clients.find(past_id);
+						auto it = clients.find(tr.id);
 						if(it == clients.end()) // No, OK, we'll wait
 						{
-							if(processed.find(past_id) != processed.end())
+							if(processed.find(tr.id) != processed.end())
 								throw std::runtime_error("File is not ordered on id, assumption broken");
 
 							continue;
 						}
 
 						// Prepare our client so that we can add the transactions
-						th = it->second;
-						empty = false;
+						tc = it->second;
 					}
 
 					// We've got a client we're working on, so write the transaction
-					if(!empty)
-						th.h.transactions.insert(std::make_pair(t.date, t));
+					if(tc)
+					{
+						if(b && (b->chain != tr.chain || b->date != tr.date))
+						{
+							tc->baskets.push_back(*b);
+							b.reset();
+						}
+
+						if(!b)
+							b = Basket(tr.chain, tr.date);
+
+						b->items.push_back(Basketitem(tr));
+					}
 				}
+
+				if(tc)
+					w.write(*tc);
 			}
 		}
 	};

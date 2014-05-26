@@ -24,13 +24,13 @@ namespace Hivemind
 			throw std::runtime_error("TrainHistory csv is not valid");
 
 		TrainHistory result;
-		result.h.id = boost::lexical_cast<Id>(line[0]);
-		result.h.chain = boost::lexical_cast<Id>(line[1]);
-		result.h.offer = boost::lexical_cast<Id>(line[2]);
-		result.h.market = boost::lexical_cast<Id>(line[3]);
+		result.id = boost::lexical_cast<Id>(line[0]);
+		result.chain = boost::lexical_cast<Id>(line[1]);
+		result.offer = boost::lexical_cast<Id>(line[2]);
+		result.market = boost::lexical_cast<Id>(line[3]);
 		result.repeattrips = boost::lexical_cast<uint64_t>(line[4]);
 		result.repeater = (line[5] == "t");
-		result.h.offerdate = toDate(line[6]);
+		result.offerdate = toDate(line[6]);
 		return result;
 	}
 }

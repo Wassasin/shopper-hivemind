@@ -6,8 +6,9 @@ namespace Hivemind
 	const QString OutputWriter::fileHeader("id,repeatProbability\n");
 
 	OutputWriter::OutputWriter(QString fileName)
+	: file(fileName)
+	, fileStream()
 	{
-		file.setFileName(fileName);
 		if(!file.open(QIODevice::WriteOnly | QIODevice::Text))
 			qFatal("Failed to open file.");
 		fileStream.setDevice(&file);

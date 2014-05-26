@@ -24,10 +24,13 @@ namespace Hivemind {
 		uint64_t purchasequantity;
 		float purchaseamount;
 
+		Transaction()
+		: id(), chain(), dept(), category(), company(), brand(), date(), productsize(), productmeasure(), purchasequantity(), purchaseamount() {}
+
 		static Transaction from_line(const std::vector<std::string>& line);
 
 		// Macro for serialization
-		MSGPACK_DEFINE(id, chain, dept, category, company, brand, date, productsize, productmeasure, purchasequantity, purchaseamount);
+		MSGPACK_DEFINE(id, chain, dept, category, company, brand, date, productsize, productmeasure, purchasequantity, purchaseamount)
 	};
 
 }
