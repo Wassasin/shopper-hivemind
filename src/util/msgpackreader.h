@@ -9,10 +9,12 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/operations.hpp>
 
+#include "reader.h"
+
 namespace Hivemind
 {
 	template<typename T>
-	class MsgpackReader
+	class MsgpackReader : public Reader<T>
 	{
 		std::ifstream m_fi;
 		boost::iostreams::filtering_istream m_si;

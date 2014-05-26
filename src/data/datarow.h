@@ -10,7 +10,9 @@ namespace Hivemind
 	class DataRow
 	{
 	public:
+		DataRow();
 		DataRow(Id id, Probability buyProbability = 0);
+
 		Id getId() const;
 		Probability getBuyProbability() const;
 

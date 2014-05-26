@@ -6,12 +6,13 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
+#include "reader.h"
 #include "csvparser.h"
 
 namespace Hivemind
 {
 	template<typename T>
-	class CsvReader
+	class CsvReader : public Reader<T>
 	{
 		std::ifstream m_fi;
 		boost::iostreams::filtering_istreambuf m_si;

@@ -5,7 +5,7 @@
 #include <msgpack.hpp>
 
 #include "typedefs.h"
-#include "transaction.h"
+#include "data/transaction.h"
 
 namespace Hivemind
 {

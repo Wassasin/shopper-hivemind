@@ -2,6 +2,8 @@
 
 namespace Hivemind
 {
+	DataRow::DataRow()
+	: id(), buyProbability() {}
 
 	DataRow::DataRow(Id id, Probability buyProbability)
 	: id(id)

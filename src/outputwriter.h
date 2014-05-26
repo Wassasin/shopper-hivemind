@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QTextStream>
 
-#include "datarow.h"
+#include "data/datarow.h"
 
 namespace Hivemind
 {

@@ -5,7 +5,7 @@
 #include <string>
 
 #include "typedefs.h"
-#include "productmeasure.h"
+#include "data/productmeasure.h"
 
 namespace Hivemind {
 

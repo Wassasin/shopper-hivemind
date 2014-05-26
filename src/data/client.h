@@ -1,8 +1,8 @@
 #pragma once
 
 #include "typedefs.h"
-#include "transaction.h"
-#include "history.h"
+#include "data/transaction.h"
+#include "data/history.h"
 
 namespace Hivemind
 {
@@ -127,6 +127,22 @@ namespace Hivemind
 		TrainClient(const TrainHistory& th)
 		: Client(th.id)
 		, offer(th)
+		{}
+
+		MSGPACK_DEFINE(id, baskets, offer)
+	};
+
+	class TestClient : public Client
+	{
+	public:
+		ClientOffer offer;
+
+		TestClient()
+		: Client(), offer() {}
+
+		TestClient(const History& h)
+		: Client(h.id)
+		, offer(h)
 		{}
 
 		MSGPACK_DEFINE(id, baskets, offer)

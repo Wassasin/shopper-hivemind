@@ -7,10 +7,12 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 
+#include "writer.h"
+
 namespace Hivemind
 {
 	template<typename T>
-	class MsgpackWriter
+	class MsgpackWriter : public Writer<T>
 	{
 		std::ofstream m_fo;
 		boost::iostreams::filtering_ostream m_so;

@@ -35,7 +35,6 @@ QMAKE_CXXFLAGS += -isystem /usr/include/qt5
 HEADERS += \
     src/transaction.h \
     src/typedefs.h \
-	src/util/convertor.h \
 	src/productmeasure.h \
 	src/offer.h \
 	src/history.h \
@@ -45,7 +44,11 @@ HEADERS += \
     src/util/msgpackreader.h \
     src/util/csvreader.h \
     src/util/csvparser.h \
-    src/client.h
+    src/client.h \
+    src/cli.h \
+    src/util/cache.h \
+    src/util/reader.h \
+    src/util/writer.h
 
 LIBS += \
   -lboost_date_time \
@@ -53,5 +56,6 @@ LIBS += \
   -lboost_system \
   -lboost_iostreams \
   -lboost_filesystem \
+  -lboost_program_options \
   -lQt5Core \
   -lmsgpack
