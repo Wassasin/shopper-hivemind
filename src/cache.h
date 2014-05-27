@@ -54,13 +54,13 @@ namespace Hivemind {
 		{
 			std::string path;
 
-			path = getPath(filename, datadir, ReaderOption::csv);
-			if(boost::filesystem::exists(path))
-				return std::make_pair(ReaderOption::csv, path);
-
 			path = getPath(filename, datadir, ReaderOption::msgpack);
 			if(boost::filesystem::exists(path))
 				return std::make_pair(ReaderOption::msgpack, path);
+
+			path = getPath(filename, datadir, ReaderOption::csv);
+			if(boost::filesystem::exists(path))
+				return std::make_pair(ReaderOption::csv, path);
 
 			return boost::none;
 		}
