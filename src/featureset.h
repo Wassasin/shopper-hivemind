@@ -2,6 +2,7 @@
 #define FEATURESET_H
 
 #include <QVector>
+#include <QSharedPointer>
 
 #include "typedefs.h"
 
@@ -11,12 +12,15 @@ namespace Hivemind
 class FeatureSet
 {
 public:
-    FeatureSet(QVector<Feature> features, Probability targetValue);
+    FeatureSet(QVector<Feature> features, Prediction targetValue);
+    FeatureSet(QVector<Feature> features);
+    FeatureSet();
     QVector<Feature> getFeatures();
-    Probability getTargetValue();
+    int getFeatureCount() const;
+    Prediction getTargetValue();
 private:
     QVector<Feature> features;
-    Probability targetValue;
+    Prediction targetValue;
 };
 
 }

@@ -9,6 +9,7 @@ namespace Hivemind {
     typedef std::uint64_t Id;
     typedef float Probability;
     typedef float Feature;
+    typedef bool  Prediction;
     typedef boost::gregorian::date Date;
 
     Date toDate(std::string str);
