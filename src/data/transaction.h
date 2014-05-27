@@ -9,28 +9,28 @@
 
 namespace Hivemind {
 
-	class Transaction
-	{
-	public:
-		Id id;
-		Id chain;
-		Id dept;
-		Id category;
-		Id company;
-		Id brand;
-		Date date;
-		float productsize;
-		Productmeasure productmeasure;
-		uint64_t purchasequantity;
-		float purchaseamount;
+    class Transaction
+    {
+    public:
+        Id id;
+        Id chain;
+        Id dept;
+        Id category;
+        Id company;
+        Id brand;
+        Date date;
+        float productsize;
+        Productmeasure productmeasure;
+        uint64_t purchasequantity;
+        float purchaseamount;
 
-		Transaction()
-		: id(), chain(), dept(), category(), company(), brand(), date(), productsize(), productmeasure(), purchasequantity(), purchaseamount() {}
+        Transaction()
+        : id(), chain(), dept(), category(), company(), brand(), date(), productsize(), productmeasure(), purchasequantity(), purchaseamount() {}
 
-		static Transaction from_line(const std::vector<std::string>& line);
+        static Transaction from_line(const std::vector<std::string>& line);
 
-		// Macro for serialization
-		MSGPACK_DEFINE(id, chain, dept, category, company, brand, date, productsize, productmeasure, purchasequantity, purchaseamount)
-	};
+        // Macro for serialization
+        MSGPACK_DEFINE(id, chain, dept, category, company, brand, date, productsize, productmeasure, purchasequantity, purchaseamount)
+    };
 
 }
