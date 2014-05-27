@@ -5,8 +5,8 @@ CONFIG += warn_on
 CONFIG += debug_and_release
 
 CONFIG -= app_bundle
-CONFIG -= qt
-
+CONFIG += qt
+QT += core
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 QMAKE_LFLAGS_RELEASE -= -O1
@@ -20,37 +20,43 @@ QMAKE_CXXFLAGS_WARN_ON += -Weffc++
 QMAKE_CXXFLAGS_WARN_ON += -pedantic
 
 SOURCES += src/main.cpp \
-	src/transaction.cpp \
-    src/offer.cpp \
-    src/history.cpp \
-	src/typedefs.cpp \
-	src/datarow.cpp \
-	src/outputwriter.cpp \
-    src/util/csvparser.cpp
+        src/data/transaction.cpp \
+    src/data/offer.cpp \
+    src/data/history.cpp \
+        src/typedefs.cpp \
+        src/data/datarow.cpp \
+        src/outputwriter.cpp \
+    src/util/csvparser.cpp \
+    src/regressor.cpp \
+    src/featureset.cpp
 
-QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
-QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
-QMAKE_CXXFLAGS += -isystem /usr/include/qt5
+unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
+unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
+unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5
+macx: INCLUDEPATH += /usr/local/include
+macx: INCLUDEPATH += src/
 
 HEADERS += \
-    src/transaction.h \
+    src/data/transaction.h \
     src/typedefs.h \
-	src/productmeasure.h \
-	src/offer.h \
-	src/history.h \
-	src/datarow.h \
-	src/outputwriter.h \
+        src/data/productmeasure.h \
+        src/data/offer.h \
+        src/data/history.h \
+        src/data/datarow.h \
+        src/outputwriter.h \
     src/util/msgpackwriter.h \
     src/util/msgpackreader.h \
     src/util/csvreader.h \
     src/util/csvparser.h \
-    src/client.h \
+    src/data/client.h \
     src/cli.h \
-    src/util/cache.h \
+    src/cache.h \
     src/util/reader.h \
-    src/util/writer.h
+    src/util/writer.h \
+    src/regressor.h \
+    src/featureset.h
 
-LIBS += \
+unix:!macx: LIBS += \
   -lboost_date_time \
   -lboost_regex \
   -lboost_system \
@@ -59,3 +65,13 @@ LIBS += \
   -lboost_program_options \
   -lQt5Core \
   -lmsgpack
+
+macx: LIBS += \
+  -L/usr/local/lib -lboost_date_time \
+  -lboost_regex \
+  -lboost_system \
+  -lboost_iostreams \
+  -lboost_filesystem \
+  -lboost_program_options \
+  -lmsgpack \
+  -lsvm
