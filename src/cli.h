@@ -154,50 +154,52 @@ namespace Hivemind
 			}
 
 			auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
-			auto rTrainHistory(Cache::getFastestReader<TrainHistory>("trainHistory", opt.datadir));
-			auto rTestHistory(Cache::getFastestReader<History>("testHistory", opt.datadir));
-			auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
 
-            auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
-            auto rClient = getClientData<History, Client>("testClients", rTestHistory, rTransaction, opt);
+            {
+                size_t result = 0;
 
-        {
-                        Client testClient;
-                        TrainClient trainClient;
-                        size_t result = 0;
-                        while(true)
-                        {
-                            bool testb = rClient->read(testClient);
-                            if(testb)
-                                for(auto& basket : testClient.baskets)
-                                    result += basket.items.size();
+                {
+                    Client testClient;
+                    auto rTestHistory(Cache::getFastestReader<History>("testHistory", opt.datadir));
+                    auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
+                    auto rClient = getClientData<History, Client>("testClients", rTestHistory, rTransaction, opt);
 
-                            bool trainb = rTrainClient->read(trainClient);
-                            if(trainb)
-                                for(auto& basket : trainClient.baskets)
-                                    result += basket.items.size();
-
-                            if(!testb && !trainb)
-                                break;
-
-                            std::cerr << result << std::endl;
-                        }
-
+                    while(rClient->read(testClient))
+                    {
+                        for(auto& basket : testClient.baskets)
+                            result += basket.items.size();
                         std::cerr << result << std::endl;
                     }
+                }
 
-			return 0;
-		}
+                {
+                    TrainClient trainClient;
+                    auto rTrainHistory(Cache::getFastestReader<TrainHistory>("trainHistory", opt.datadir));
+                    auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
+                    auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
+                    while(rTrainClient->read(trainClient))
+                    {
+                        for(auto& basket : trainClient.baskets)
+                            result += basket.items.size();
+                        std::cerr << result << std::endl;
+                    }
+                }
 
-	public:
-		static int run(int argc, char** argv)
-		{
-			Options opt;
-			int result = interpret(opt, argc, argv);
-			if(result != 0)
-				return result;
+                std::cerr << result << std::endl;
+            }
 
-			return act(opt);
-		}
-	};
+            return 0;
+        }
+
+    public:
+        static int run(int argc, char** argv)
+        {
+            Options opt;
+            int result = interpret(opt, argc, argv);
+            if(result != 0)
+                return result;
+
+            return act(opt);
+        }
+    };
 }
