@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+set +x
+
+mkdir -p data
+pushd data
+wget -np -nd -nc -r -R index.html,hivemind nyamsas.quezacotl.nl/hivemind
+popd
