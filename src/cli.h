@@ -159,32 +159,32 @@ namespace Hivemind
 			auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
 
             auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
-            auto rTestClient = getClientData<History, TestClient>("testClients", rTestHistory, rTransaction, opt);
+            auto rClient = getClientData<History, Client>("testClients", rTestHistory, rTransaction, opt);
 
-			{
-                TestClient testClient;
-                TrainClient trainClient;
-				size_t result = 0;
-                while(true)
-				{
-                    bool testb = rTestClient->read(testClient);
-                    if(testb)
-                        for(auto& basket : testClient.baskets)
-                            result += basket.items.size();
+        {
+                        Client testClient;
+                        TrainClient trainClient;
+                        size_t result = 0;
+                        while(true)
+                        {
+                            bool testb = rClient->read(testClient);
+                            if(testb)
+                                for(auto& basket : testClient.baskets)
+                                    result += basket.items.size();
 
-                    bool trainb = rTrainClient->read(trainClient);
-                    if(trainb)
-                        for(auto& basket : trainClient.baskets)
-                            result += basket.items.size();
+                            bool trainb = rTrainClient->read(trainClient);
+                            if(trainb)
+                                for(auto& basket : trainClient.baskets)
+                                    result += basket.items.size();
 
-                    if(!testb && !trainb)
-                        break;
+                            if(!testb && !trainb)
+                                break;
 
-					std::cerr << result << std::endl;
-				}
+                            std::cerr << result << std::endl;
+                        }
 
-				std::cerr << result << std::endl;
-			}
+                        std::cerr << result << std::endl;
+                    }
 
 			return 0;
 		}

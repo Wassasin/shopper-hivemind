@@ -58,93 +58,46 @@ namespace Hivemind
 	{
 	public:
 		Id id;
+
+        Id chain;
+        Id offer;
+        Id market;
+        Date offerdate;
+
 		std::vector<Basket> baskets;
 
 		Client()
-		: id(), baskets() {}
+        : id(), chain(), offer(), market(), offerdate(), baskets() {}
 
-		Client(const Id id)
-		: id(id)
+        Client(const History& h)
+        : id(h.id)
+        , chain(h.chain)
+        , offer(h.offer)
+        , market(h.market)
+        , offerdate(h.offerdate)
 		, baskets()
 		{}
 
 		virtual ~Client() {}
 
-		MSGPACK_DEFINE(id, baskets)
-	};
-
-	class ClientOffer
-	{
-	public:
-		Id client;
-		Id chain;
-		Id offer;
-		Id market;
-		Date offerdate;
-
-		ClientOffer()
-		: client(), chain(), offer(), market(), offerdate() {}
-
-		ClientOffer(const History& h)
-		: client(h.id)
-		, chain(h.chain)
-		, offer(h.offer)
-		, market(h.market)
-		, offerdate(h.offerdate)
-		{}
-
-		virtual ~ClientOffer() {}
-
-		MSGPACK_DEFINE(client, chain, offer, market, offerdate)
-	};
-
-	class TrainClientOffer : public ClientOffer
-	{
-	public:
-		uint64_t repeattrips;
-		bool repeater;
-
-		TrainClientOffer()
-		: ClientOffer(), repeattrips(), repeater() {}
-
-		TrainClientOffer(const TrainHistory& th)
-		: ClientOffer(th)
-		, repeattrips(th.repeattrips)
-		, repeater(th.repeater)
-		{}
-
-		MSGPACK_DEFINE(client, chain, offer, market, offerdate, repeattrips, repeater)
+        MSGPACK_DEFINE(id, chain, offer, market, offerdate, baskets)
 	};
 
 	class TrainClient : public Client
 	{
 	public:
-		TrainClientOffer offer;
+        uint64_t repeattrips;
+        bool repeater;
 
 		TrainClient()
-		: Client(), offer() {}
+        : Client(), repeattrips(), repeater() {}
 
 		TrainClient(const TrainHistory& th)
-		: Client(th.id)
-		, offer(th)
+        : Client(th)
+        , repeattrips(th.repeattrips)
+        , repeater(th.repeater)
 		{}
 
-		MSGPACK_DEFINE(id, baskets, offer)
-	};
-
-	class TestClient : public Client
-	{
-	public:
-		ClientOffer offer;
-
-		TestClient()
-		: Client(), offer() {}
-
-		TestClient(const History& h)
-		: Client(h.id)
-		, offer(h)
-		{}
-
-		MSGPACK_DEFINE(id, baskets, offer)
+        MSGPACK_DEFINE(id, chain, offer, market, offerdate, baskets, repeattrips, repeater)
 	};
 }

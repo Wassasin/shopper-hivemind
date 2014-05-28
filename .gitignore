@@ -3,4 +3,5 @@
 *.autosave
 
 # Data folder
-data
+/data
+/build
