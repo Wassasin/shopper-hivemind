@@ -100,6 +100,31 @@ namespace Hivemind
 			return 0;
 		}
 
+        template<typename HISTORY, typename CLIENT>
+        static std::shared_ptr<Reader<CLIENT>> getClientData(const std::string& filename, std::shared_ptr<Reader<HISTORY>> rHistory, std::shared_ptr<Reader<Transaction>> rTransaction, const Options& opt)
+        {
+            std::shared_ptr<Reader<CLIENT>> rClient;
+
+            {
+               std::string path = Cache::getPath(filename, opt.datadir, Cache::ReaderOption::msgpack);
+               if(!Cache::isAvailable(filename, opt.datadir))
+               {
+                   rClient.reset(new Joiner<HISTORY, CLIENT>(rHistory, rTransaction));
+
+                   if(opt.generate_cache)
+                   {
+                       MsgpackWriter<CLIENT> wClient(path);
+                       Cache::generateCache(*rClient, wClient);
+                       rClient.reset(new MsgpackReader<CLIENT>(path));
+                   }
+               }
+               else
+                   rClient.reset(new MsgpackReader<CLIENT>(path));
+            }
+
+            return rClient;
+        }
+
 		static int act(const Options& opt)
 		{
 			Cache::checkDatadir(opt.datadir);
@@ -133,31 +158,27 @@ namespace Hivemind
 			auto rTestHistory(Cache::getFastestReader<History>("testHistory", opt.datadir));
 			auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
 
-			std::shared_ptr<Reader<TrainClient>> rTrainClient;
-			{
-				std::string pathTrainClient = Cache::getPath("trainClients", opt.datadir, Cache::ReaderOption::msgpack);
-				if(!Cache::isAvailable("trainClients", opt.datadir))
-				{
-					rTrainClient.reset(new Joiner<TrainHistory, TrainClient>(rTrainHistory, rTransaction));
-
-					if(opt.generate_cache)
-					{
-						MsgpackWriter<TrainClient> wTrainClient(pathTrainClient);
-						Cache::generateCache(*rTrainClient, wTrainClient);
-						rTrainClient.reset(new MsgpackReader<TrainClient>(pathTrainClient));
-					}
-				}
-				else
-					rTrainClient.reset(new MsgpackReader<TrainClient>(pathTrainClient));
-			}
+            auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
+            auto rTestClient = getClientData<History, TestClient>("testClients", rTestHistory, rTransaction, opt);
 
 			{
-				TrainClient tc;
+                TestClient testClient;
+                TrainClient trainClient;
 				size_t result = 0;
-				while(rTrainClient->read(tc))
+                while(true)
 				{
-					for(auto& basket : tc.baskets)
-						result += basket.items.size();
+                    bool testb = rTestClient->read(testClient);
+                    if(testb)
+                        for(auto& basket : testClient.baskets)
+                            result += basket.items.size();
+
+                    bool trainb = rTrainClient->read(trainClient);
+                    if(trainb)
+                        for(auto& basket : trainClient.baskets)
+                            result += basket.items.size();
+
+                    if(!testb && !trainb)
+                        break;
 
 					std::cerr << result << std::endl;
 				}
