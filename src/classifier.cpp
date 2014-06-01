@@ -1,4 +1,4 @@
-#include "regressor.h"
+#include "classifier.h"
 #include <QSharedPointer>
 #include <QDebug>
 
@@ -6,12 +6,12 @@ namespace Hivemind
 {
 
 
-Regressor::Regressor()
+Classifier::Classifier()
     : model(nullptr), problem(nullptr), param(nullptr)
 {
 }
 
-void Regressor::saveModel(QString filename)
+void Classifier::saveModel(QString filename)
 {
     if(model == nullptr)
         qCritical() << "A request was made to save the model to a file, but the model was NULL.";
@@ -19,36 +19,38 @@ void Regressor::saveModel(QString filename)
         qCritical() << "Failed to save model to file.";
 }
 
-void Regressor::loadModel(QString filename)
+void Classifier::loadModel(QString filename)
 {
     model = svm_load_model(filename.toLocal8Bit());
     if(model == nullptr)
         qFatal("Failed to load model from file.");
 }
 
-void Regressor::train(QVector<FeatureSet> trainData)
+void Classifier::train(QVector<FeatureSet> trainData)
 {
-    svm_problem *problem = new svm_problem;
+    problem = new svm_problem;
     problem->l = trainData.size();
 
     // Build list of prediction values and features, in libSVM-format
-    QVector<double> prediction(trainData.size());
-
+    QVector<double> prediction;
+    prediction.reserve(trainData.size());
     for(FeatureSet s: trainData)
         prediction.append(s.getTargetValue());
 
     problem->y = prediction.data();
-    svmX = buildSVMNodeArray(trainData);
+    buildSVMNodeArray(trainData);
     problem->x = svmX.data();
 
     param = new svm_parameter;
     param->svm_type = C_SVC;
     param->kernel_type = LINEAR;
-    param->cache_size = 100; // cache_size is the size of the kernel cache, specified in megabytes, No idea
+    param->degree = 0;
+    param->gamma = 0;
+    param->cache_size = 1000; // cache_size is the size of the kernel cache, specified in megabytes, No idea
     param->C = 1; // C is the cost of constraints violation, No idea
-    param->eps = 0.001; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
-    param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
-    param->shrinking = 0; // shrinking = 1 means shrinking is conducted; = 0 otherwise
+    param->eps = 0.01; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
+    //param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
+    param->shrinking = 1; // shrinking = 1 means shrinking is conducted; = 0 otherwise
     param->probability = 1; // probability = 1 means model with probability information is obtained; = 0 otherwise
     param->nr_weight = 0; // No weight changes, data should be normalized beforehand
     const char *err = svm_check_parameter(problem, param);
@@ -56,9 +58,10 @@ void Regressor::train(QVector<FeatureSet> trainData)
         qFatal(err);
 
     model = svm_train(problem, param);
+    qDebug() << "Done training";
 }
 
-Probability Regressor::predict(FeatureSet testVector)
+Probability Classifier::predict(FeatureSet testVector)
 {
     if(model == nullptr)
         qFatal("Cannot predict with null model.");
@@ -74,43 +77,39 @@ Probability Regressor::predict(FeatureSet testVector)
     int i = 0;
     for(Feature f: testVector.getFeatures())
     {
-        svm_node &node = nodeArray[i];
-        node.index = i++;
-        node.value = f;
+        nodeArray[i].index = i;
+        nodeArray[i].value = f;
+        i++;
     }
 
-    svm_node &node = nodeArray[i];
-    node.index = -1;
+    nodeArray[i].index = -1;
 
     // Predict probability
     double outcome[2];
     svm_predict_probability(model, nodeArray, outcome);
-    return outcome[1];
+    return outcome[0];
 }
 
-QVector<svm_node*> Regressor::buildSVMNodeArray(QVector<FeatureSet> trainData)
+void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
 {
-    QVector<svm_node*> nodeVector(trainData.size());
+    svmX.reserve(trainData.size());
     for(FeatureSet s: trainData)
     {
         svm_node* nodeArray = new svm_node[s.getFeatureCount()+1];
         int i = 0;
         for(Feature f: s.getFeatures())
         {
-            svm_node &node = nodeArray[i];
-            node.index = i++;
-            node.value = f;
+            nodeArray[i].value = f;
+            nodeArray[i].index = i;
+            i++;
         }
 
-        svm_node &node = nodeArray[i];
-        node.index = -1;
-        nodeVector.append(nodeArray);
+        nodeArray[i].index = -1;
+        svmX.append(nodeArray);
     }
-
-    return nodeVector;
 }
 
-Regressor::~Regressor()
+Classifier::~Classifier()
 {
     delete param;
     svm_free_and_destroy_model(&model);

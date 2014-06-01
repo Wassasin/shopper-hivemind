@@ -7,8 +7,8 @@ CONFIG += debug_and_release
 CONFIG -= app_bundle
 CONFIG += qt
 QT += core
-QMAKE_CXXFLAGS_RELEASE -= -O2
-QMAKE_CXXFLAGS_RELEASE += -O3
+QMAKE_CXXFLAGS_RELEASE += -O2
+QMAKE_CXXFLAGS_RELEASE -= -O3
 QMAKE_LFLAGS_RELEASE -= -O1
 
 QMAKE_CXXFLAGS_DEBUG += -O0
@@ -27,8 +27,9 @@ SOURCES += src/main.cpp \
         src/data/datarow.cpp \
         src/outputwriter.cpp \
     src/util/csvparser.cpp \
-    src/regressor.cpp \
-    src/featureset.cpp
+    src/featureset.cpp \
+    src/classifier.cpp \
+    src/util/featureextractor.cpp
 
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
@@ -53,8 +54,9 @@ HEADERS += \
     src/cache.h \
     src/util/reader.h \
     src/util/writer.h \
-    src/regressor.h \
-    src/featureset.h
+    src/featureset.h \
+    src/classifier.h \
+    src/util/featureextractor.h
 
 unix:!macx: LIBS += \
   -lboost_date_time \

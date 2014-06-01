@@ -9,38 +9,38 @@
 
 namespace Hivemind
 {
-	class History
-	{
-	public:
-		Id id;
-		Id chain;
-		Id offer;
-		Id market;
-		Date offerdate;
+    class History
+    {
+    public:
+        Id id;
+        Id chain;
+        Id offer;
+        Id market;
+        Date offerDate;
 
-		History()
-		: id(), chain(), offer(), market(), offerdate() {}
+        History()
+        : id(), chain(), offer(), market(), offerDate() {}
 
-		virtual ~History() {}
+        virtual ~History() {}
 
-		static History from_line(const std::vector<std::string>& line);
+        static History from_line(const std::vector<std::string>& line);
 
-		// Macro for serialization
-		MSGPACK_DEFINE(id, chain, offer, market, offerdate)
-	};
+        // Macro for serialization
+        MSGPACK_DEFINE(id, chain, offer, market, offerDate)
+    };
 
-	class TrainHistory : public History
-	{
-	public:
-		uint64_t repeattrips;
-		bool repeater;
+    class TrainHistory : public History
+    {
+    public:
+        uint64_t repeattrips;
+        bool repeater;
 
-		TrainHistory()
-		: History(), repeattrips(), repeater() {}
+        TrainHistory()
+        : History(), repeattrips(), repeater() {}
 
-		static TrainHistory from_line(const std::vector<std::string>& line);
+        static TrainHistory from_line(const std::vector<std::string>& line);
 
-		// Macro for serialization
-		MSGPACK_DEFINE(id, chain, offer, market, offerdate, repeattrips, repeater)
-	};
+        // Macro for serialization
+        MSGPACK_DEFINE(id, chain, offer, market, offerDate, repeattrips, repeater)
+    };
 }

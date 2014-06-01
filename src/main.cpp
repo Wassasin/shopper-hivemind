@@ -1,5 +1,5 @@
 #include "cli.h"
-#include "regressor.h"
+#include "classifier.h"
 #include "featureset.h"
 #include <QDebug>
 

@@ -14,7 +14,7 @@ namespace Hivemind
 		result.chain = boost::lexical_cast<Id>(line[1]);
 		result.offer = boost::lexical_cast<Id>(line[2]);
 		result.market = boost::lexical_cast<Id>(line[3]);
-		result.offerdate = toDate(line[4]);
+		result.offerDate = toDate(line[4]);
 		return result;
 	}
 
@@ -30,7 +30,7 @@ namespace Hivemind
 		result.market = boost::lexical_cast<Id>(line[3]);
 		result.repeattrips = boost::lexical_cast<uint64_t>(line[4]);
 		result.repeater = (line[5] == "t");
-		result.offerdate = toDate(line[6]);
+		result.offerDate = toDate(line[6]);
 		return result;
 	}
 }

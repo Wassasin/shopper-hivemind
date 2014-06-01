@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <QDate>
 #include <msgpack.hpp>
 #include <boost/date_time/gregorian/greg_date.hpp>
 
@@ -10,7 +11,7 @@ namespace Hivemind {
     typedef float Probability;
     typedef float Feature;
     typedef bool  Prediction;
-    typedef boost::gregorian::date Date;
+    typedef QDate Date;
 
     Date toDate(std::string str);
 

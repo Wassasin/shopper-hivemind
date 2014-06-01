@@ -10,11 +10,11 @@ namespace Hivemind
 {
 
 
-class Regressor
+class Classifier
 {
 public:
-    Regressor();
-    ~Regressor();
+    Classifier();
+    ~Classifier();
     void saveModel(QString filename);
     void loadModel(QString filename);
     void train(QVector<FeatureSet> trainData);
@@ -24,7 +24,7 @@ private:
     svm_problem *problem;
     svm_parameter *param;
     QVector<svm_node*> svmX;
-    static QVector<svm_node*> buildSVMNodeArray(QVector<FeatureSet> trainData);
+    void buildSVMNodeArray(QVector<FeatureSet> trainData);
 };
 
 }
