@@ -48,9 +48,9 @@ void Classifier::train(QVector<FeatureSet> trainData)
     param->gamma = 0;
     param->cache_size = 1000; // cache_size is the size of the kernel cache, specified in megabytes, No idea
     param->C = 1; // C is the cost of constraints violation, No idea
-    param->eps = 0.01; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
+    param->eps = 0.1; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
     //param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
-    param->shrinking = 1; // shrinking = 1 means shrinking is conducted; = 0 otherwise
+    param->shrinking = 0; // shrinking = 1 means shrinking is conducted; = 0 otherwise
     param->probability = 1; // probability = 1 means model with probability information is obtained; = 0 otherwise
     param->nr_weight = 0; // No weight changes, data should be normalized beforehand
     const char *err = svm_check_parameter(problem, param);
@@ -87,7 +87,7 @@ Probability Classifier::predict(FeatureSet testVector)
     // Predict probability
     double outcome[2];
     svm_predict_probability(model, nodeArray, outcome);
-    return outcome[0];
+    return outcome[1];
 }
 
 void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
