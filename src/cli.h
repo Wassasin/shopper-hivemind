@@ -6,6 +6,9 @@
 #include "cache.h"
 #include "joiner.h"
 
+#include "util/filter.h"
+#include "util/splitter.h"
+
 #include "data/offer.h"
 #include "data/transaction.h"
 #include "data/history.h"
@@ -157,7 +160,7 @@ namespace Hivemind
 
             {
                 size_t result = 0;
-
+/*
                 {
                     Client testClient;
                     auto rTestHistory(Cache::getFastestReader<History>("testHistory", opt.datadir));
@@ -171,18 +174,22 @@ namespace Hivemind
                         std::cerr << result << std::endl;
                     }
                 }
-
+*/
                 {
-                    TrainClient trainClient;
                     auto rTrainHistory(Cache::getFastestReader<TrainHistory>("trainHistory", opt.datadir));
                     auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
                     auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
-                    while(rTrainClient->read(trainClient))
-                    {
-                        for(auto& basket : trainClient.baskets)
-                            result += basket.items.size();
-                        std::cerr << result << std::endl;
-                    }
+
+                    std::shared_ptr<Reader<TrainClient>> f(new Filter<TrainClient>(rTrainClient, 9000, 160058));
+
+                    std::shared_ptr<Writer<TrainClient>> wSubsetTrainClient(new MsgpackWriter<TrainClient>(Cache::getPath("subsetTrainClient", opt.datadir, Cache::ReaderOption::msgpack)));
+                    std::shared_ptr<Writer<TrainClient>> wSubsetTuneClient(new MsgpackWriter<TrainClient>(Cache::getPath("subsetTuneClient", opt.datadir, Cache::ReaderOption::msgpack)));
+                    std::shared_ptr<Writer<TrainClient>> wSubsetTestClient(new MsgpackWriter<TrainClient>(Cache::getPath("subsetTestClient", opt.datadir, Cache::ReaderOption::msgpack)));
+
+                    std::array<std::shared_ptr<Writer<TrainClient>>, 3> writers({{
+                        wSubsetTrainClient, wSubsetTuneClient, wSubsetTestClient
+                    }});
+                    Splitter::split<TrainClient, 3>(f, writers);
                 }
 
                 std::cerr << result << std::endl;
