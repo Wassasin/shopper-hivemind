@@ -31,6 +31,9 @@ void Classifier::train(QVector<FeatureSet> trainData)
     problem = new svm_problem;
     problem->l = trainData.size();
 
+    // Normalise data
+    normalise(trainData);
+
     // Build list of prediction values and features, in libSVM-format
     QVector<double> prediction;
     prediction.reserve(trainData.size());
