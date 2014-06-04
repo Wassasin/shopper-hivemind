@@ -163,6 +163,8 @@ namespace Hivemind
 
 
             {
+                Classifier c;
+
                 size_t result = 0;
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
@@ -175,7 +177,7 @@ namespace Hivemind
                     while(rTrainClient->read(trainClient))
                         trainData.append(f.createFeatureSet(trainClient));
 
-                    Classifier c;
+
                     c.train(trainData);
                     c.saveModel("model2.data");
                 }
@@ -183,7 +185,7 @@ namespace Hivemind
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
-                    Classifier c;
+                    //Classifier c;
                     c.loadModel("model2.data");
                     QVector<DataRow> output;
 
