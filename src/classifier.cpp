@@ -51,7 +51,7 @@ void Classifier::train(QVector<FeatureSet> trainData)
     param->eps = 0.1; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
     //param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
     param->shrinking = 0; // shrinking = 1 means shrinking is conducted; = 0 otherwise
-    param->probability = 0; // probability = 1 means model with probability information is obtained; = 0 otherwise
+    param->probability = 1; // probability = 1 means model with probability information is obtained; = 0 otherwise
     param->nr_weight = 0; // No weight changes, data should be normalized beforehand
     const char *err = svm_check_parameter(problem, param);
     if(err != nullptr)
