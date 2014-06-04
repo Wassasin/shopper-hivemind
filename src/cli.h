@@ -179,14 +179,14 @@ namespace Hivemind
 
 
                     c.train(trainData);
-                    c.saveModel("model2.data");
+                    c.saveModel("model.data");
                 }
 
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
                     //Classifier c;
-                    c.loadModel("model2.data");
+                    c.loadModel("model.data");
                     QVector<DataRow> output;
 
                     Client testClient;
@@ -200,7 +200,7 @@ namespace Hivemind
                         output.append(DataRow(testClient.id, p));
                     }
 
-                    OutputWriter writer("output2.csv");
+                    OutputWriter writer("output.csv");
                     writer.write(output);
 
                 }
