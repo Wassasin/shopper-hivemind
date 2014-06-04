@@ -18,18 +18,19 @@ namespace Hivemind
             offers.insert(tmp.id, tmp);
     }
 
-    FeatureSet FeatureExtractor::createFeatureSet(Client client) {
+    FeatureSet FeatureExtractor::createFeatureSet(const Client &client) {
         QVector<Feature> features = extractFeatures(client);
         return FeatureSet(features);
     }
 
-    FeatureSet FeatureExtractor::createFeatureSet(TrainClient client) {
+    FeatureSet FeatureExtractor::createFeatureSet(const TrainClient &client) {
         QVector<Feature> features = extractFeatures(client);
         return FeatureSet(features, client.repeater);
     }
 
-    QVector<Feature> FeatureExtractor::extractFeatures(Client client) {
-        QVector<Feature> features(11 /* feature count */);
+    QVector<Feature> FeatureExtractor::extractFeatures(const Client &client) {
+        QVector<Feature> features;
+        features.reserve(10);
 
         Offer offer = offers.value(client.offer);
 
@@ -37,6 +38,8 @@ namespace Hivemind
         features.append(offer.offervalue); // The offer value
 
         Id offerDept = findOfferDepartment(client, offer);
+        if(offerDept == -1)
+            return QVector<Feature>();
         //features.append(offerDept); // The deparment of the offer
 
         QPair<int, int> tripsInfo = countTrips(client);
@@ -60,7 +63,7 @@ namespace Hivemind
     }
 
     /** Returns (offerDeparmentId) */
-    int FeatureExtractor::findOfferDepartment(Client client, Offer offer) {
+    int FeatureExtractor::findOfferDepartment(const Client &client, const Offer &offer) {
         foreach (Basket basket, client.baskets)
             foreach (Basketitem item, basket.items)
                 if (isOfferItem(item, offer))
@@ -69,7 +72,7 @@ namespace Hivemind
     }
 
     /** Returns (tripsBeforeOffer, tripsAfterOffer) */
-    QPair<int, int> FeatureExtractor::countTrips(Client client) {
+    QPair<int, int> FeatureExtractor::countTrips(const Client &client) {
         QSet<Date> datesBefore;
         QSet<Date> datesAfter;
         foreach(Basket basket, client.baskets) {
@@ -82,7 +85,7 @@ namespace Hivemind
     }
 
     /** Returns (offerItemRatio, offerValueRatio) */
-    QPair<float, float> FeatureExtractor::calcOfferRatio(Client client, Offer offer) {
+    QPair<float, float> FeatureExtractor::calcOfferRatio(const Client &client, const Offer &offer) {
         float totalItemCount = 0;
         float totalItemValue = 0;
         float totalOfferCount = 0;
@@ -90,6 +93,8 @@ namespace Hivemind
 
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
+                if(item.purchaseamount <= 0)
+                    continue;
                 totalItemCount += 1;
                 totalItemValue += item.purchaseamount;
 
@@ -104,7 +109,7 @@ namespace Hivemind
     }
 
     /** Returns ((boughtOfferBefore, boughtBrandBefore), delay) */
-	QPair<QPair<bool, bool>, int> FeatureExtractor::calcPurchaseInfo(Client client, Offer offer, Id offerDept) {
+    QPair<QPair<bool, bool>, int> FeatureExtractor::calcPurchaseInfo(const Client &client, const Offer &offer, const Id &offerDept) {
         bool boughtOfferBefore = false;
         bool boughtBrandCategoryBefore = false;
 
@@ -112,7 +117,7 @@ namespace Hivemind
             foreach (Basketitem item, basket.items) {
                 if (isOfferItem(item, offer)) {
                     if (basket.date >= client.offerDate)
-						return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), (int)client.offerDate.daysTo(basket.date));
+                        return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), (int)client.offerDate.daysTo(basket.date));
                     else
                         boughtOfferBefore = true;
                 }
@@ -124,7 +129,7 @@ namespace Hivemind
     }
 
     /** Returns (totalReturns, brandReturns) */
-    QPair<int, int> FeatureExtractor::countReturns(Client client, Offer offer) {
+    QPair<int, int> FeatureExtractor::countReturns(const Client &client, const Offer &offer) {
         int returnTotalCount = 0;
         int returnBrandCount = 0;
 
@@ -140,9 +145,7 @@ namespace Hivemind
         return qMakePair(returnTotalCount, returnBrandCount);
     }
 
-    bool FeatureExtractor::isOfferItem(Basketitem item, Offer offer) {
+    bool FeatureExtractor::isOfferItem(const Basketitem &item, const Offer &offer) {
         return item.brand == offer.brand && item.category == offer.category && item.company == offer.company;
     }
-
-
 }
