@@ -33,11 +33,11 @@ namespace Hivemind
 
         Offer offer = offers.value(client.offer);
 
-        features.append(offer.brand); // The brand of the offer
+        //features.append(offer.brand); // The brand of the offer
         features.append(offer.offervalue); // The offer value
 
         Id offerDept = findOfferDepartment(client, offer);
-        features.append(offerDept); // The deparment of the offer
+        //features.append(offerDept); // The deparment of the offer
 
         QPair<int, int> tripsInfo = countTrips(client);
         features.append(tripsInfo.first); // Number of visits to a chain *before* receiving the offer
