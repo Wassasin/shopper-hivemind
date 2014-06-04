@@ -108,7 +108,7 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
                 continue;
             }
 
-            nodeArray[i].value = f;
+            nodeArray[i].value = f * maxValues.at(i);
             nodeArray[i].index = i;
             i++;
         }
@@ -120,7 +120,6 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
 
 void Classifier::normalise(QVector<FeatureSet> &trainData)
 {
-    QVector<Feature> maxValues;
     for(FeatureSet s : trainData)
     {
         QVector<Feature> features = s.getFeatures();
@@ -131,13 +130,6 @@ void Classifier::normalise(QVector<FeatureSet> &trainData)
 
     for(int i = 0; i < maxValues.size(); i++)
         maxValues[i] = 1. / maxValues[i];
-
-    for(FeatureSet &s : trainData)
-    {
-        QVector<Feature> &features = s.getFeaturesRef();
-        for(int i = 0; i < features.size(); i++)
-            features[i] *= maxValues[i];
-    }
 }
 
 Classifier::~Classifier()
