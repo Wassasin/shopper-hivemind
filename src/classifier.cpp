@@ -62,7 +62,7 @@ void Classifier::train(QVector<FeatureSet> trainData)
 {
     qDebug() << "Hi there. Let's train a model.";
     problem = new svm_problem;
-    problem->l = trainData.size()/100;
+    problem->l = trainData.size();
 
     // Normalise data
     qDebug() << "Calculating maximum values of features...";
@@ -87,9 +87,9 @@ void Classifier::train(QVector<FeatureSet> trainData)
     param->svm_type = C_SVC;
     param->kernel_type = LINEAR;
     param->gamma = 0.5;
-    param->degree = 2;
+    param->degree = 1;
     param->cache_size = 1000; // cache_size is the size of the kernel cache, specified in megabytes, No idea
-    param->C = 10; // C is the cost of constraints violation, No idea
+    param->C = 1; // C is the cost of constraints violation, No idea
     param->eps = 0.01; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
     //param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
     param->shrinking = 0; // shrinking = 1 means shrinking is conducted; = 0 otherwise
@@ -133,7 +133,7 @@ Probability Classifier::predict(FeatureSet testVector)
     double classLabel = svm_predict_values(model, nodeArray, &decisionValue);
 //    if(classLabel == 0)
 //        return 1 - decisionValue;
-    return classLabel;
+    return decisionValue;
 }
 
 void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
