@@ -3,6 +3,7 @@
 #include <QMultiHash>
 #include <QSet>
 #include <QDebug>
+#include <QDate>
 
 #include "cache.h"
 #include "reader.h"
@@ -103,7 +104,7 @@ namespace Hivemind
     }
 
     /** Returns ((boughtOfferBefore, boughtBrandBefore), delay) */
-    QPair<QPair<int, int>, int> FeatureExtractor::calcPurchaseInfo(Client client, Offer offer, Id offerDept) {
+	QPair<QPair<bool, bool>, int> FeatureExtractor::calcPurchaseInfo(Client client, Offer offer, Id offerDept) {
         bool boughtOfferBefore = false;
         bool boughtBrandCategoryBefore = false;
 
@@ -111,7 +112,7 @@ namespace Hivemind
             foreach (Basketitem item, basket.items) {
                 if (isOfferItem(item, offer)) {
                     if (basket.date >= client.offerDate)
-                        return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), client.offerDate.daysTo(basket.date));
+						return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), (int)client.offerDate.daysTo(basket.date));
                     else
                         boughtOfferBefore = true;
                 }
