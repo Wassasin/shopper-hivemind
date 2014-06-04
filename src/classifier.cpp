@@ -120,6 +120,7 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
 
 void Classifier::normalise(QVector<FeatureSet> &trainData)
 {
+    maxValues.resize(trainData.first().getFeatures().size());
     for(FeatureSet s : trainData)
     {
         QVector<Feature> features = s.getFeatures();
