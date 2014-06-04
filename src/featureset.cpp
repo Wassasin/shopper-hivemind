@@ -24,6 +24,11 @@ QVector<Feature> FeatureSet::getFeatures()
     return features;
 }
 
+QVector<Feature>& FeatureSet::getFeaturesRef()
+{
+    return features;
+}
+
 int FeatureSet::getFeatureCount() const
 {
     return features.size();

@@ -43,21 +43,24 @@ void Classifier::train(QVector<FeatureSet> trainData)
 
     param = new svm_parameter;
     param->svm_type = C_SVC;
-    param->kernel_type = LINEAR;
-    param->degree = 0;
-    param->gamma = 0;
+    param->kernel_type = RBF;
+    param->gamma = 1;
+    param->degree = 1;
     param->cache_size = 1000; // cache_size is the size of the kernel cache, specified in megabytes, No idea
     param->C = 1; // C is the cost of constraints violation, No idea
     param->eps = 0.1; // eps is the stopping criterion. (we usually use 0.00001 in nu-SVC, 0.001 in others)
     //param->p   = 1; // p is the epsilon in epsilon-insensitive loss function of epsilon-SVM regression, no idea
     param->shrinking = 0; // shrinking = 1 means shrinking is conducted; = 0 otherwise
-    param->probability = 1; // probability = 1 means model with probability information is obtained; = 0 otherwise
+    param->probability = 0; // probability = 1 means model with probability information is obtained; = 0 otherwise
     param->nr_weight = 0; // No weight changes, data should be normalized beforehand
     const char *err = svm_check_parameter(problem, param);
     if(err != nullptr)
         qFatal(err);
 
     model = svm_train(problem, param);
+//    double *output = new double[trainData.size()];
+//    svm_cross_validation(problem, param, 10, output);
+//    delete output;
     qDebug() << "Done training";
 }
 
@@ -99,6 +102,12 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
         int i = 0;
         for(Feature f: s.getFeatures())
         {
+            if(f == 0)
+            {
+                i++;
+                continue;
+            }
+
             nodeArray[i].value = f;
             nodeArray[i].index = i;
             i++;
@@ -106,6 +115,28 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
 
         nodeArray[i].index = -1;
         svmX.append(nodeArray);
+    }
+}
+
+void Classifier::normalise(QVector<FeatureSet> &trainData)
+{
+    QVector<Feature> maxValues;
+    for(FeatureSet s : trainData)
+    {
+        QVector<Feature> features = s.getFeatures();
+        for(int i = 0; i < features.size(); i++)
+            if(features.at(i) > maxValues.at(i))
+                maxValues[i] = features.at(i);
+    }
+
+    for(int i = 0; i < maxValues.size(); i++)
+        maxValues[i] = 1. / maxValues[i];
+
+    for(FeatureSet &s : trainData)
+    {
+        QVector<Feature> &features = s.getFeaturesRef();
+        for(int i = 0; i < features.size(); i++)
+            features[i] *= maxValues[i];
     }
 }
 

@@ -25,6 +25,7 @@ private:
     svm_parameter *param;
     QVector<svm_node*> svmX;
     void buildSVMNodeArray(QVector<FeatureSet> trainData);
+    void normalise(QVector<FeatureSet> &trainData);
 };
 
 }

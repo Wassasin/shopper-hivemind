@@ -16,6 +16,7 @@ public:
     FeatureSet(QVector<Feature> features);
     FeatureSet();
     QVector<Feature> getFeatures();
+    QVector<Feature>& getFeaturesRef();
     int getFeatureCount() const;
     Prediction getTargetValue();
 private:
