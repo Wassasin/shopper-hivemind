@@ -137,7 +137,7 @@ Probability Classifier::predict(FeatureSet testVector)
     return decisionValue;
 }
 
-int Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
+void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
 {
     svmX.reserve(trainData.size());
     for(FeatureSet s: trainData)
