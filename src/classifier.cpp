@@ -2,6 +2,7 @@
 #include <QSharedPointer>
 #include <QDebug>
 #include <QFile>
+#include <QDataStream>
 
 namespace Hivemind
 {
