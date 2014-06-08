@@ -22,17 +22,17 @@ public:
     FeatureExtractor(Hivemind::Reader<Offer> &reader);
 
 
-    FeatureSet createFeatureSet(Client client);
-    FeatureSet createFeatureSet(TrainClient client);
+    FeatureSet createFeatureSet(const Client &client);
+    FeatureSet createFeatureSet(const TrainClient &client);
 
 private:
-    QVector<Feature> extractFeatures(Client client);
-    int findOfferDepartment(Client client, Offer offer);
-    QPair<int, int> countTrips(Client client);
-    QPair<float, float> calcOfferRatio(Client client, Offer offer);
-	QPair<QPair<bool, bool>, int> calcPurchaseInfo(Client client, Offer offer, Id offerDept);
-    QPair<int, int> countReturns(Client client, Offer offer);
-    bool isOfferItem(Basketitem item, Offer offer);
+    QVector<Feature> extractFeatures(const Client &client);
+    int findOfferDepartment(const Client &client, const Offer &offer);
+    QPair<int, int> countTrips(const Client &client);
+    QPair<float, float> calcOfferRatio(const Client &client, const Offer &offer);
+    QPair<QPair<bool, bool>, int> calcPurchaseInfo(const Client &client, const Offer &offer, const Id &offerDept);
+    QPair<int, int> countReturns(const Client &client, const Offer &offer);
+    bool isOfferItem(const Basketitem &item, const Offer &offer);
 
     QHash<Id, Offer> offers;
 

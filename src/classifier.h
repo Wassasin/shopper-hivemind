@@ -25,8 +25,9 @@ private:
     svm_parameter *param;
     QVector<svm_node*> svmX;
     QVector<Feature> maxValues;
-    void buildSVMNodeArray(QVector<FeatureSet> trainData);
-    void normalise(QVector<FeatureSet> &trainData);
+    int predictionCount;
+    int buildSVMNodeArray(QVector<FeatureSet> trainData);
+    void calculateMax(QVector<FeatureSet> trainData);
 };
 
 }
