@@ -103,6 +103,8 @@ namespace Hivemind
                     << "Usage: ./shopper-hivemind [options]" << std::endl
                     << std::endl
                     << o_general;
+
+                return 1;
             }
 
             return 0;
