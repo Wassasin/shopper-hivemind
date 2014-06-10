@@ -12,10 +12,13 @@ include_directories(SYSTEM ${msgpack_INCLUDE_DIRS})
 find_package(svm REQUIRED)
 include_directories(SYSTEM ${svm_INCLUDE_DIRS})
 
+find_package(vw REQUIRED)
+include_directories(SYSTEM ${vw_INCLUDE_DIRS})
+
 find_package(Qt5Core REQUIRED)
 add_definitions(${QT5Core_DEFINITIONS})
 
 add_executable(shopper-hivemind ${shopper-hivemind_SOURCES} ${shopper-hivemind_HEADERS})
 qt5_use_modules(shopper-hivemind Core)
 include_directories(.)
-target_link_libraries(shopper-hivemind ${Boost_LIBRARIES} ${msgpack_LIBRARIES} ${QT_LIBRARIES} ${svm_LIBRARIES})
+target_link_libraries(shopper-hivemind ${Boost_LIBRARIES} ${msgpack_LIBRARIES} ${QT_LIBRARIES} ${svm_LIBRARIES} ${vw_LIBRARIES})
