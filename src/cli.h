@@ -4,7 +4,10 @@
 #include <boost/program_options.hpp>
 
 #include "typedefs.h"
+
 #include "classifier.h"
+#include "linearclassifier.h"
+
 #include "outputwriter.h"
 
 #include "dataset.h"
