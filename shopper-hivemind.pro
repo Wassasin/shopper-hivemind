@@ -7,6 +7,7 @@ CONFIG += debug_and_release
 CONFIG -= app_bundle
 CONFIG += qt
 QT += core
+QT -= opengl
 QMAKE_CXXFLAGS_RELEASE += -O2
 QMAKE_CXXFLAGS_RELEASE -= -O3
 QMAKE_LFLAGS_RELEASE -= -O1
@@ -35,7 +36,9 @@ unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5
 macx: INCLUDEPATH += /usr/local/include
-macx: INCLUDEPATH += src/
+INCLUDEPATH += src/ \
+    /usr/include/libsvm \
+    /usr/include/boost
 
 HEADERS += \
     src/data/transaction.h \
@@ -66,7 +69,8 @@ unix:!macx: LIBS += \
   -lboost_filesystem \
   -lboost_program_options \
   -lQt5Core \
-  -lmsgpack
+  -lmsgpack \
+  -lsvm
 
 macx: LIBS += \
   -L/usr/local/lib -lboost_date_time \
