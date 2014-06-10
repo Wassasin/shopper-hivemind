@@ -2,6 +2,12 @@
 *.pro*
 *.autosave
 
+# CMake stuff
+CMakeLists.txt.user*
+
 # Data folder
 /data
+/backup
+
+# Build stuff
 /build
