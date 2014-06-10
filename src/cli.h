@@ -3,16 +3,11 @@
 #include <memory>
 #include <boost/program_options.hpp>
 
-#include "cache.h"
-#include "joiner.h"
-
-#include "data/offer.h"
-#include "data/transaction.h"
-#include "data/history.h"
-
 #include "typedefs.h"
 #include "classifier.h"
 #include "outputwriter.h"
+
+#include "dataset.h"
 
 #include "util/featureextractor.h"
 
@@ -29,6 +24,7 @@ namespace Hivemind
             bool generate_cache = false;
             bool clear_cache = false;
             bool force = false;
+            bool debug = false;
             bool train = false;
             std::string datadir = "./data";
         };
@@ -57,6 +53,7 @@ namespace Hivemind
             ("help,h", "display this message")
             ("cache,c", "generate cache files,  if they do not exist yet")
             ("clear-cache,p", "clears cache files (will ask for confirmation)")
+            ("debug,t", "use small debug subset, for code testing purposes")
             ("force,f", "will never ask confirmation, answer [YES] to everything")
             ("datadir,d", boost::program_options::value<decltype(opt.datadir)>(&opt.datadir), "specify in which directory to search for the data files (default ./data)");
 
@@ -90,6 +87,9 @@ namespace Hivemind
             if(vm.count("clear-cache"))
                 opt.clear_cache = true;
 
+            if(vm.count("debug"))
+                opt.debug = true;
+
             if(vm.count("force"))
                 opt.force = true;
 
@@ -108,31 +108,6 @@ namespace Hivemind
             return 0;
         }
 
-        template<typename HISTORY, typename CLIENT>
-        static std::shared_ptr<Reader<CLIENT>> getClientData(const std::string& filename, std::shared_ptr<Reader<HISTORY>> rHistory, std::shared_ptr<Reader<Transaction>> rTransaction, const Options& opt)
-        {
-            std::shared_ptr<Reader<CLIENT>> rClient;
-
-            {
-               std::string path = Cache::getPath(filename, opt.datadir, Cache::ReaderOption::msgpack);
-               if(!Cache::isAvailable(filename, opt.datadir))
-               {
-                   rClient.reset(new Joiner<HISTORY, CLIENT>(rHistory, rTransaction));
-
-                   if(opt.generate_cache)
-                   {
-                       MsgpackWriter<CLIENT> wClient(path);
-                       Cache::generateCache(*rClient, wClient);
-                       rClient.reset(new MsgpackReader<CLIENT>(path));
-                   }
-               }
-               else
-                   rClient.reset(new MsgpackReader<CLIENT>(path));
-            }
-
-            return rClient;
-        }
-
         static int act(const Options& opt)
         {
             Cache::checkDatadir(opt.datadir);
@@ -146,21 +121,11 @@ namespace Hivemind
                         return 1;
                 }
 
-                Cache::clearCache("offers", opt.datadir);
-                Cache::clearCache("trainHistory", opt.datadir);
-                Cache::clearCache("testHistory", opt.datadir);
-                Cache::clearCache("transactions", opt.datadir);
-                Cache::clearCache("trainClients", opt.datadir);
+                Dataset::clearCache(opt.datadir);
             }
 
-            if(opt.generate_cache)
-            {
-                Cache::generateCache<Offer>("offers", opt.datadir);
-                Cache::generateCache<TrainHistory>("trainHistory", opt.datadir);
-                Cache::generateCache<History>("testHistory", opt.datadir);
-                Cache::generateCache<Transaction>("transactions", opt.datadir);
-            }
-
+            Dataset d(opt.datadir, opt.generate_cache, opt.debug);
+            auto readers = d.getRealReaders();
 
             {
                 size_t result = 0;
@@ -168,41 +133,34 @@ namespace Hivemind
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     QVector<FeatureSet> trainData;
                     FeatureExtractor f(*rOffer);
+
                     TrainClient trainClient;
-                    auto rTrainHistory(Cache::getFastestReader<TrainHistory>("trainHistory", opt.datadir));
-                    auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
-                    auto rTrainClient = getClientData<TrainHistory, TrainClient>("trainClients", rTrainHistory, rTransaction, opt);
-                    while(rTrainClient->read(trainClient))
+                    while(readers.rTrainClients->read(trainClient))
                         trainData.append(f.createFeatureSet(trainClient));
 
                     Classifier c;
                     c.train(trainData);
-                    c.saveModel("model2.data");
+                    c.saveModel("model.data");
                 }
 
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
                     Classifier c;
-                    c.loadModel("model2.data");
+                    c.loadModel("model.data");
                     QVector<DataRow> output;
 
                     Client testClient;
-                    auto rTestHistory(Cache::getFastestReader<History>("testHistory", opt.datadir));
-                    auto rTransaction(Cache::getFastestReader<Transaction>("transactions", opt.datadir));
-                    auto rClient = getClientData<History, Client>("testClients", rTestHistory, rTransaction, opt);
-
-                    while(rClient->read(testClient))
+                    while(readers.rTestClients->read(testClient))
                     {
                         Probability p = c.predict(f.createFeatureSet(testClient));
                         output.append(DataRow(testClient.id, p));
                     }
 
-                    OutputWriter writer("output2.csv");
+                    OutputWriter writer("output.csv");
                     writer.write(output);
 
                 }
-
 
                 std::cerr << result << std::endl;
             }
