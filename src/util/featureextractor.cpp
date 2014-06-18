@@ -44,7 +44,7 @@ namespace Hivemind
 
         QPair<int, int> tripsInfo = countTrips(client);
         features.append(tripsInfo.first); // Number of visits to a chain *before* receiving the offer
-        features.append(tripsInfo.second); // Number of visits to a chain *after* receiving the offer
+        //features.append(tripsInfo.second); // Number of visits to a chain *after* receiving the offer
 
         QPair<float, float> offerInfo = calcOfferRatio(client, offer);
         features.append(offerInfo.first); // The ratio offer : allItems for the number of unique items per basket, averaged over all baskets
@@ -53,7 +53,7 @@ namespace Hivemind
         QPair<QPair<bool, bool>, int> purchaseInfo = calcPurchaseInfo(client, offer, offerDept);
         features.append(purchaseInfo.first.first); // Whether the client has bought the offer's product before receiving the offer
         features.append(purchaseInfo.first.second); // Whether the client has bought the offer's brand and department before receiving the offer
-        features.append(purchaseInfo.second); // The number of days that elapsed before the client redeemed the offer (-1 if never)
+        //features.append(purchaseInfo.second); // The number of days that elapsed before the client redeemed the offer (-1 if never)
 
         QPair<int, int> returnInfo = countReturns(client, offer);
         features.append(returnInfo.first); // The number of times the client has returned something

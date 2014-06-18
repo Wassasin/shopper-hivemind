@@ -143,7 +143,11 @@ namespace Hivemind
 
                     TrainClient trainClient;
                     while(readers.rTrainClients->read(trainClient))
-                        trainData.append(f.createFeatureSet(trainClient));
+                    {
+                        auto features = f.createFeatureSet(trainClient);
+                        if(features.getFeatureCount() != 0)
+                            trainData.append(features);
+                    }
 
                     std::cerr << "Built trainData" << std::endl;
 

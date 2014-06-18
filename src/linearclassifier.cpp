@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
 
+#define TYPEDCALLOC(type,n) (type *)std::calloc(sizeof(type), (n))
+
 namespace Hivemind
 {
 
@@ -16,10 +18,7 @@ LinearClassifier::LinearClassifier()
 LinearClassifier::~LinearClassifier()
 {
     if(m != nullptr)
-    {
-        free_model_content(m);
         free_and_destroy_model(&m);
-    }
 
     if(normalisationFactors != nullptr)
         delete[] normalisationFactors;
@@ -38,8 +37,6 @@ void LinearClassifier::loadNormalisationFactors(QVector<FeatureSet> trainData)
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
     {
         FeatureSet& s = trainData[i];
-        if(s.getFeatures().isEmpty())
-            continue;
 
         QVector<Feature> features = s.getFeatures();
         for(size_t j = 0; j < dimensions; j++)
@@ -60,33 +57,32 @@ problem LinearClassifier::loadProblem(QVector<FeatureSet> trainData)
 
     loadNormalisationFactors(trainData);
 
-    prob.y = new int[trainData.size()];
+    prob.y = TYPEDCALLOC(int, trainData.size());
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
         prob.y[i] = trainData[i].getTargetValue();
 
-    prob.x = new feature_node*[trainData.size()];
+    prob.x = TYPEDCALLOC(feature_node*, trainData.size());
 
     assert(trainData.size() > 0);
     prob.n = trainData[0].getFeatureCount();
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
     {
         FeatureSet& s = trainData[i];
-        if(s.getFeatures().isEmpty())
-            continue;
 
         // Last element must be "-1", thus add extra element
         QVector<Feature> features = s.getFeatures();
-        feature_node* nodeArray = new feature_node[features.size()+1];
+        feature_node* nodeArray = TYPEDCALLOC(feature_node, features.size()+1);
 
         assert(prob.n == features.size());
         for(size_t j = 0; j < (size_t)features.size(); j++)
-            nodeArray[j] = {(int)j, features[j] / normalisationFactors[j]};
+            nodeArray[j] = {(int)j+1, features[j] / normalisationFactors[j]};
 
         nodeArray[features.size()].index = -1;
         prob.x[i] = nodeArray;
     }
 
     prob.l = trainData.size();
+    prob.bias = -1;
 
     return prob;
 }
@@ -97,11 +93,11 @@ void LinearClassifier::train(QVector<FeatureSet> trainData)
 
     parameter param;
     param.solver_type = L2R_LR;
-    param.C = 1;
-    param.eps = 9001; // INF
+    param.C = 0.001;
+    param.eps = 0.0001;
     param.nr_weight = 0;
-    param.weight_label = NULL;
-    param.weight = NULL;
+    param.weight_label = TYPEDCALLOC(int, 0);
+    param.weight = TYPEDCALLOC(double, 0);
 
     const char *err = ::check_parameter(&prob, &param);
     if(err != nullptr)
@@ -110,10 +106,10 @@ void LinearClassifier::train(QVector<FeatureSet> trainData)
     std::cerr << "Let the training commence." << std::endl;
     m = ::train(&prob, &param);
 
-    delete[] prob.y;
+    std::free(prob.y);
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
-        delete[] prob.x[i];
-    delete[] prob.x;
+        std::free(prob.x[i]);
+    std::free(prob.x);
 
     std::cerr << "Done training." << std::endl;
 }
@@ -125,17 +121,17 @@ Probability LinearClassifier::predict(FeatureSet testVector)
 
     assert(normalisationFactors != nullptr);
 
-    feature_node* x = new feature_node[testVector.getFeatureCount()+1];
+    feature_node* x = TYPEDCALLOC(feature_node, testVector.getFeatureCount()+1);
     QVector<Feature> features = testVector.getFeatures();
     for(size_t i = 0; i < (size_t)features.size(); i++)
-        x[i] = {(int)i, features[i] / normalisationFactors[i]};
+        x[i] = {(int)i+1, features[i] / normalisationFactors[i]};
 
-    x[testVector.getFeatureCount()].index = -1;
+    x[features.size()].index = -1;
 
     double decisionValue = 0;
     predict_probability(m, x, &decisionValue);
 
-    delete[] x;
+    std::free(x);
 
     return decisionValue;
 }
