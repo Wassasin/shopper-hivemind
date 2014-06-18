@@ -130,9 +130,11 @@ namespace Hivemind
             }
 
             Dataset d(opt.datadir, opt.generate_cache, opt.debug);
+
             auto readers = d.getRealReaders();
 
             {
+                LinearClassifier c;
                 size_t result = 0;
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
@@ -143,16 +145,19 @@ namespace Hivemind
                     while(readers.rTrainClients->read(trainClient))
                         trainData.append(f.createFeatureSet(trainClient));
 
-                    Classifier c;
+                    std::cerr << "Built trainData" << std::endl;
+
                     c.train(trainData);
-                    c.saveModel("model.data");
+
+                    std::cerr << "Trained" << std::endl;
+                    //c.saveModel("model.data");
                 }
 
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
-                    Classifier c;
-                    c.loadModel("model.data");
+                    //Classifier c;
+                    //c.loadModel("model.data");
                     QVector<DataRow> output;
 
                     Client testClient;
