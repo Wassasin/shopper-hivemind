@@ -54,8 +54,8 @@ namespace Hivemind
     }
 
     /** Returns the ratio ABCD amount : total amount, with ABCD being Brand/Category/Company/Department or a combination of those. */
-    QVector<float> FeatureExtractor::calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept) {
-        QVector<float> counts(12);
+    QVector<Feature> FeatureExtractor::calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept) {
+        QVector<Feature> counts(12);
 
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
@@ -114,7 +114,7 @@ namespace Hivemind
 
                 int index = item.purchaseamount >= 0 ? 0 : FEATURE_COUNT;
                 for (int i = 0; i < DAY_COUNT; ++i) {
-                    if (client.offerDate - basket.date > days[i])
+                    if (basket.date.daysTo(client.offerDate) > days[i])
                         break;
 
                     counts[index++] += brand;

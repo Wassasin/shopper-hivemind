@@ -29,8 +29,8 @@ private:
     QVector<Feature> extractFeatures(const Client &client);
     int findOfferDepartment(const Client &client, const Offer &offer);
 
-    QVector<float> calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept);
-    QVector<int> countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept);
+    QVector<Feature> calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept);
+    QVector<Feature> countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept);
 
     int signum(float f);
     int signum(uint64_t f);
