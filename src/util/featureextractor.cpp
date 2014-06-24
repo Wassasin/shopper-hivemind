@@ -95,10 +95,10 @@ namespace Hivemind
       * All above is done for a number of days between the offer date and the item purchase date.
       */
     QVector<Feature> FeatureExtractor::countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept) {
-        int DAY_COUNT = 8;
-        int FEATURE_COUNT = 12 * DAY_COUNT;
+        const int DAY_COUNT = 8;
+        const int FEATURE_COUNT = 12 * DAY_COUNT;
 
-        int days[DAY_COUNT] = { 1000000, 360, 180, 150, 120, 90, 60, 30 };
+        const int days[DAY_COUNT] = { 1000000, 360, 180, 150, 120, 90, 60, 30 };
 
         QVector<Feature> counts(FEATURE_COUNT * 2); // Feature count is for purchase only, we need to double it to make room for returns
 
