@@ -17,7 +17,8 @@ public:
     ~Classifier();
     void saveModel(QString filename);
     void loadModel(QString filename);
-    void train(QVector<FeatureSet> trainData);
+    void train(QVector<FeatureSet> trainData, bool cross_validate = false);
+    void crossValidate(QVector<FeatureSet> trainData);
     Probability predict(FeatureSet testVector);
 private:
     svm_model *model;
