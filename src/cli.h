@@ -6,6 +6,7 @@
 #include "typedefs.h"
 
 #include "classifier.h"
+#include "util/normaliser.h"
 #include "linearclassifier.h"
 
 #include "outputwriter.h"
@@ -144,6 +145,9 @@ namespace Hivemind
                         trainData.append(f.createFeatureSet(trainClient));
 
                     Classifier c;
+                    Normaliser n(trainData);
+                    n.normalise(trainData);
+                    n.saveModel("model.norm");
                     c.train(trainData);
                     c.saveModel("model.data");
                 }
@@ -152,13 +156,16 @@ namespace Hivemind
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
                     Classifier c;
+                    Normaliser n("model.norm");
                     c.loadModel("model.data");
                     QVector<DataRow> output;
 
                     Client testClient;
                     while(readers.rTestClients->read(testClient))
                     {
-                        Probability p = c.predict(f.createFeatureSet(testClient));
+                        FeatureSet feat = f.createFeatureSet(testClient);
+                        n.normalise(feat);
+                        Probability p = c.predict(feat);
                         output.append(DataRow(testClient.id, p));
                     }
 

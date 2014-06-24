@@ -25,17 +25,6 @@ void Classifier::saveModel(QString filename)
         qCritical() << "Failed to save model to file.";
         return;
     }
-
-    // Now save the scaling vector
-    QFile file(filename + ".scale");
-    if(!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-    {
-        qCritical() << "Failed to open file " + filename + ": saving of scaling vector failed.";
-        return;
-    }
-
-    QDataStream stream(&file);
-    stream << maxValues;
 }
 
 void Classifier::loadModel(QString filename)
@@ -46,28 +35,12 @@ void Classifier::loadModel(QString filename)
         qFatal("Failed to load model from file.");
         return;
     }
-
-    // Now load the scaling vector
-    QFile file(filename + ".scale");
-    if(!file.open(QIODevice::ReadOnly))
-    {
-        qFatal(QString("Failed to open file " + filename + ": loading of scaling vector failed.").toLocal8Bit());
-        return;
-    }
-
-    QDataStream stream(&file);
-    stream >> maxValues;
 }
 
 void Classifier::train(QVector<FeatureSet> trainData)
 {
     qDebug() << "Hi there. Let's train a model.";
     problem = new svm_problem;
-
-    // Normalise data
-    qDebug() << "Calculating maximum values of features...";
-    calculateMax(trainData);
-    qDebug() << "Done.";
 
     // Build list of prediction values and features, in libSVM-format
     qDebug() << "Determining prediction labels...";
@@ -123,7 +96,7 @@ Probability Classifier::predict(FeatureSet testVector)
     for(Feature f: testVector.getFeatures())
     {
         nodeArray[i].index = i;
-        nodeArray[i].value = f * maxValues.at(i);
+        nodeArray[i].value = f;
         i++;
     }
 
@@ -155,7 +128,7 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
                 continue;
             }
 
-            nodeArray[i].value = f * maxValues.at(i);
+            nodeArray[i].value = f;
             nodeArray[i].index = i;
             i++;
         }
@@ -163,33 +136,6 @@ void Classifier::buildSVMNodeArray(QVector<FeatureSet> trainData)
         nodeArray[i].index = -1;
         svmX.append(nodeArray);
     }
-}
-
-void Classifier::calculateMax(QVector<FeatureSet> trainData)
-{
-    for(FeatureSet s : trainData)
-    {
-        QVector<Feature> features = s.getFeatures();
-        if(!features.isEmpty())
-        {
-            maxValues.resize(features.size());
-            break;
-        }
-    }
-
-    for(FeatureSet s : trainData)
-    {
-        QVector<Feature> features = s.getFeatures();
-        if(features.isEmpty())
-            continue;
-
-        for(int i = 0; i < features.size(); i++)
-            if(features.at(i) > maxValues.at(i))
-                maxValues[i] = features.at(i);
-    }
-
-    for(int i = 0; i < maxValues.size(); i++)
-        maxValues[i] = 1. / maxValues.at(i);
 }
 
 Classifier::~Classifier()

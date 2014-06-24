@@ -28,9 +28,11 @@ SOURCES += src/main.cpp \
         src/data/datarow.cpp \
         src/outputwriter.cpp \
     src/util/csvparser.cpp \
-    src/regressor.cpp \
     src/featureset.cpp \
-    src/util/featureextractor.cpp
+    src/util/featureextractor.cpp \
+    src/util/normaliser.cpp \
+    src/dataset.cpp \
+    src/classifier.cpp
 
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
@@ -57,9 +59,11 @@ HEADERS += \
     src/cache.h \
     src/util/reader.h \
     src/util/writer.h \
-    src/regressor.h \
     src/featureset.h \
-    src/util/featureextractor.h
+    src/util/featureextractor.h \
+    src/util/normaliser.h \
+    src/dataset.h \
+    src/classifier.h
 
 unix:!macx: LIBS += \
   -lboost_date_time \
