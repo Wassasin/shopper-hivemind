@@ -3,10 +3,13 @@
 #include <memory>
 #include <boost/program_options.hpp>
 
+#include <QDebug>
+
 #include "typedefs.h"
 
 #include "classifier.h"
 #include "util/normaliser.h"
+#include "util/measures.h"
 #include "linearclassifier.h"
 
 #include "outputwriter.h"
@@ -144,6 +147,18 @@ namespace Hivemind
                     while(readers.rTrainClients->read(trainClient))
                         trainData.append(f.createFeatureSet(trainClient));
 
+                    int featureCount = 0;
+                    for (FeatureSet fs : trainData) {
+                        Measures m(fs.getFeatures());
+                        qDebug() << "---\nFeature " << (featureCount++);
+                        qDebug() << "\nMean: " << m.getMean();
+                        qDebug() << "\nMin : " << m.getMin();
+                        qDebug() << "\nMax : " << m.getMax();
+                        qDebug() << "\nVar : " << m.calculateVariance();
+                        qDebug() << "\nDev : " << m.calculateDeviation();
+                        qDebug() << "\n";
+                    }
+
                     Classifier c;
                     Normaliser n(trainData);
                     n.normalise(trainData);
@@ -187,7 +202,6 @@ namespace Hivemind
             int result = interpret(opt, argc, argv);
             if(result != 0)
                 return result;
-
             return act(opt);
         }
     };
