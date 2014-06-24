@@ -48,7 +48,7 @@ namespace Hivemind
     int FeatureExtractor::findOfferDepartment(const Client &client, const Offer &offer) {
         foreach (Basket basket, client.baskets)
             foreach (Basketitem item, basket.items)
-                if (isOfferItem(item, offer))
+                if (item.brand == offer.brand && item.company == offer.company && item.category == offer.category)
                     return item.dept;
         return -1;
     }
