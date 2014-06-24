@@ -147,17 +147,17 @@ namespace Hivemind
                     while(readers.rTrainClients->read(trainClient))
                         trainData.append(f.createFeatureSet(trainClient));
 
-                    int featureCount = 0;
-                    for (FeatureSet fs : trainData) {
-                        Measures m(fs.getFeatures());
-                        qDebug() << "---\nFeature " << (featureCount++);
-                        qDebug() << "\nMean: " << m.getMean();
-                        qDebug() << "\nMin : " << m.getMin();
-                        qDebug() << "\nMax : " << m.getMax();
-                        qDebug() << "\nVar : " << m.calculateVariance();
-                        qDebug() << "\nDev : " << m.calculateDeviation();
-                        qDebug() << "\n";
-                    }
+//                    int featureCount = 0;
+//                    for (FeatureSet fs : trainData) {
+//                        Measures m(fs.getFeatures());
+//                        qDebug() << "---\nFeature " << (featureCount++);
+//                        qDebug() << "\nMean: " << m.getMean();
+//                        qDebug() << "\nMin : " << m.getMin();
+//                        qDebug() << "\nMax : " << m.getMax();
+//                        qDebug() << "\nVar : " << m.calculateVariance();
+//                        qDebug() << "\nDev : " << m.calculateDeviation();
+//                        qDebug() << "\n";
+//                    }
 
                     Classifier c;
                     Normaliser n(trainData);
