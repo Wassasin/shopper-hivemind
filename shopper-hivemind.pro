@@ -28,8 +28,8 @@ SOURCES += src/main.cpp \
         src/data/datarow.cpp \
         src/outputwriter.cpp \
     src/util/csvparser.cpp \
+    src/regressor.cpp \
     src/featureset.cpp \
-    src/classifier.cpp \
     src/util/featureextractor.cpp
 
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
@@ -57,8 +57,8 @@ HEADERS += \
     src/cache.h \
     src/util/reader.h \
     src/util/writer.h \
+    src/regressor.h \
     src/featureset.h \
-    src/classifier.h \
     src/util/featureextractor.h
 
 unix:!macx: LIBS += \

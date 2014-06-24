@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 #ifndef FEATUREEXTRACTOR_H
 #define FEATUREEXTRACTOR_H
 
@@ -40,3 +41,45 @@ private:
 
 }
 #endif // FEATUREEXTRACTOR_H
+=======
+#ifndef FEATUREEXTRACTOR_H
+#define FEATUREEXTRACTOR_H
+
+#include <QList>
+#include <QVector>
+#include <QHash>
+
+#include "typedefs.h"
+#include "featureset.h"
+#include "data/client.h"
+#include "data/history.h"
+#include "data/offer.h"
+#include "data/transaction.h"
+
+namespace Hivemind
+{
+
+class FeatureExtractor
+{
+public:
+    FeatureExtractor();
+
+    QVector<Feature> extractFeatures(Client client);
+
+    static FeatureSet createFeatureSet(Client client);
+    static FeatureSet createFeatureSet(TrainClient client);
+
+private:
+    int findOfferDepartment(Client client, Offer offer);
+    QPair<int, int> countTrips(Client client);
+    QPair<float, float> calcOfferRatio(Client client, Offer offer);
+    QPair<QPair<int, int>, int> calcPurchaseInfo(Client client, Offer offer, Id offerDept);
+    QPair<int, int> countReturns(Client client, Offer offer);
+    bool isOfferItem(Basketitem item, Offer offer);
+
+    QHash<Id, Offer> offers;
+
+}
+
+#endif // FEATUREEXTRACTOR_H
+>>>>>>> Stashed changes
