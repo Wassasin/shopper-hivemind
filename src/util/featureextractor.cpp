@@ -37,7 +37,7 @@ namespace Hivemind
 //      features.append(offer.quantity); // Quantity is useless
         features.append(offer.offervalue);
 
-        features += calcPurchaseRatios(client, offer, offerDepts);
+        features += calcPurchaseRatios(client, offer, offerDept);
 
         features += countPurchasesAndReturns(client, offer, offerDept);
 
@@ -94,13 +94,13 @@ namespace Hivemind
       * or a combination of those. The number of purchase and return trips is also included.
       * All above is done for a number of days between the offer date and the item purchase date.
       */
-    QVector<int> FeatureExtractor::countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept) {
+    QVector<Feature> FeatureExtractor::countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept) {
         int DAY_COUNT = 8;
         int FEATURE_COUNT = 12 * DAY_COUNT;
 
         int days[DAY_COUNT] = { 1000000, 360, 180, 150, 120, 90, 60, 30 };
 
-        QVector<int> counts(FEATURE_COUNT * 2); // Feature count is for purchase only, we need to double it to make room for returns
+        QVector<Feature> counts(FEATURE_COUNT * 2); // Feature count is for purchase only, we need to double it to make room for returns
 
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
