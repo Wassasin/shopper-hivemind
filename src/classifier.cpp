@@ -131,9 +131,6 @@ Probability Classifier::predict(FeatureSet testVector)
     // Predict probability
     double decisionValue = 0; // 0 vs 1
     double classLabel = svm_predict_values(model, nodeArray, &decisionValue);
-    if(classLabel == 0)
-        return 1 - decisionValue;
-
     return decisionValue;
 }
 

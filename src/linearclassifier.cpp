@@ -24,7 +24,7 @@ problem LinearClassifier::loadProblem(QVector<FeatureSet> trainData)
 {
     problem prob;
 
-    prob.y = TYPEDCALLOC(int, trainData.size());
+    prob.y = TYPEDCALLOC(double, trainData.size());
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
         prob.y[i] = trainData[i].getTargetValue();
 

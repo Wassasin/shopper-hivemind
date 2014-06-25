@@ -68,9 +68,7 @@ void Normaliser::normalise(FeatureSet &data)
     for(Feature &f : data.getFeatures())
     {
         f *= maxValues.at(i++);
-
-        if(f < 0)
-            qWarning() << "Warning: negative feature detected";
+        Q_ASSERT(f>0);
     }
 }
 

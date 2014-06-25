@@ -1,6 +1,7 @@
 #include "measures.h"
 
-#include<cfloat>
+#include <float.h>
+#include <QtCore/qmath.h>
 #include <QVector>
 
 namespace Hivemind
@@ -13,7 +14,7 @@ Measures::Measures(QVector<Feature> featureCol):featureCol(featureCol),mean(0.0)
 
 float Measures::calculateDeviation()
 {
-    return sqrt(calculateVariance());
+    return qSqrt(calculateVariance());
 }
 
 float Measures::calculateVariance()
@@ -21,8 +22,8 @@ float Measures::calculateVariance()
     double sumDiff = 0.0;
     double mean = calculateMean();
     for (Feature f : featureCol)
-        sumDiff += pow(f - mean, 2);
-	return sumDiff / featureCol.size();
+        sumDiff += qPow(f - mean, 2);
+    return sumDiff / featureCol.size();
 }
 
 float Measures::getMean()
@@ -60,7 +61,7 @@ float Measures::calculateMean()
     double sum = 0.0;
     for (Feature f : featureCol)
         sum += f;
-	return sum / featureCol.size();
+    return sum / featureCol.size();
 }
 
 }

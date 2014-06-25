@@ -1,6 +1,6 @@
 #pragma once
 
-#include <linear.h>
+#include "linear.h"
 
 #include "featureset.h"
 

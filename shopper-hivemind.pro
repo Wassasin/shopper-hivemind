@@ -32,7 +32,9 @@ SOURCES += src/main.cpp \
     src/util/featureextractor.cpp \
     src/util/normaliser.cpp \
     src/dataset.cpp \
-    src/classifier.cpp
+    src/classifier.cpp \
+    src/linearclassifier.cpp \
+    src/util/measures.cpp
 
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/msgpack
 unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5/QtCore
@@ -40,7 +42,8 @@ unix:!macx: QMAKE_CXXFLAGS += -isystem /usr/include/qt5
 macx: INCLUDEPATH += /usr/local/include
 INCLUDEPATH += src/ \
     /usr/include/libsvm \
-    /usr/include/boost
+    /usr/include/boost \
+    /usr/include/liblinear
 
 HEADERS += \
     src/data/transaction.h \
@@ -63,7 +66,12 @@ HEADERS += \
     src/util/featureextractor.h \
     src/util/normaliser.h \
     src/dataset.h \
-    src/classifier.h
+    src/classifier.h \
+    src/linearclassifier.h \
+    src/util/measures.h \
+    src/util/filter.h \
+    src/util/splitter.h \
+    src/joiner.h
 
 unix:!macx: LIBS += \
   -lboost_date_time \
@@ -74,7 +82,8 @@ unix:!macx: LIBS += \
   -lboost_program_options \
   -lQt5Core \
   -lmsgpack \
-  -lsvm
+  -lsvm \
+  -llinear
 
 macx: LIBS += \
   -L/usr/local/lib -lboost_date_time \
@@ -84,4 +93,5 @@ macx: LIBS += \
   -lboost_filesystem \
   -lboost_program_options \
   -lmsgpack \
-  -lsvm
+  -lsvm \
+  -llinear
