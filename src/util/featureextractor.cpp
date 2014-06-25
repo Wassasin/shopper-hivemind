@@ -41,7 +41,7 @@ namespace Hivemind
         features += calcPurchaseRatios(client, offer, offerDept);
 
         features += countPurchasesAndReturns(client, offer, offerDept);
-        
+
         features += countDiversities(client);
 
         return features;
@@ -138,20 +138,20 @@ namespace Hivemind
 
         return counts;
     }
-    
+
     /**
      * Counts how 'diverse' the client is. This method returns the number of different Xs per Y, with
      * X/Y being dept/brand/company/category. It does this for both purchases and returns (separately).
-     */ 
+     */
     QVector<Feature> FeatureExtractor::countDiversities(const Client &client) {
         int FEATURE_COUNT = 11;
         QVector<QHash<Id, QSet<Id>>> thingsToThangs(FEATURE_COUNT * 2);
-        
+
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
                 if (signum(item.purchaseamount) != signum(item.purchasequantity))
                     continue; // Noise
-                    
+
                 QVector<QPair<Id, Id>> pairs(FEATURE_COUNT);
                 pairs[0] = qMakePair(item.dept, item.brand);
                 pairs[1] = qMakePair(item.dept, item.company);
@@ -164,9 +164,9 @@ namespace Hivemind
                 pairs[8] = qMakePair(item.company, item.category);
                 pairs[9] = qMakePair(item.category, item.brand);
                 pairs[10]= qMakePair(item.category, item.company);
-                
+
                 int index = item.purchaseamount >= 0 ? 0 : FEATURE_COUNT;
-                foreach(QPair<Id, Id> pair, pairs) {
+                for(QPair<Id, Id> pair : pairs) {
                     QHash<Id, QSet<Id>> hash = thingsToThangs[index];
                     QSet<Id> set = hash.value(pair.first);
                     set.insert(pair.second);
@@ -174,12 +174,13 @@ namespace Hivemind
                 }
             }
         }
-        
+
         QVector<Feature> counts;
         counts.reserve(FEATURE_COUNT * 2);
-        
-        foreach(Id key, thingsToThangs.keys()) {
-            counts.append(thingsToThangs.value(key).size());
+
+        for(QHash<Id, QSet<Id>> thingToThangs : thingsToThangs) {
+            for (Id key : thingToThangs.keys())
+                counts.append(thingToThangs.value(key).size());
         }
 
         return counts;
