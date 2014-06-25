@@ -31,6 +31,7 @@ private:
 
     QVector<Feature> calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept);
     QVector<Feature> countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept);
+    QVector<Feature> countDiversities(const Client &client);
 
     int signum(float f);
     int signum(uint64_t f);
