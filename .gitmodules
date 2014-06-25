@@ -1,3 +1,6 @@
 [submodule "contrib/wubwubcmake"]
 	path = contrib/wubwubcmake
 	url = https://github.com/NickNick/wubwubcmake.git
+[submodule "contrib/liblinear"]
+	path = contrib/liblinear
+	url = https://github.com/Wassasin/liblinear.git
