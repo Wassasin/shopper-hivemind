@@ -11,12 +11,10 @@ class LinearClassifier
 {
 private:
     model* m;
-    double* normalisationFactors;
 
     LinearClassifier(LinearClassifier&) = delete;
     LinearClassifier& operator=(LinearClassifier&) = delete;
 
-    void loadNormalisationFactors(QVector<FeatureSet> trainData);
     problem loadProblem(QVector<FeatureSet> trainData);
 
 public:

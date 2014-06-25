@@ -10,7 +10,6 @@ namespace Hivemind
 
 LinearClassifier::LinearClassifier()
     : m(nullptr)
-    , normalisationFactors(nullptr)
 {
     //
 }
@@ -19,43 +18,11 @@ LinearClassifier::~LinearClassifier()
 {
     if(m != nullptr)
         free_and_destroy_model(&m);
-
-    if(normalisationFactors != nullptr)
-        delete[] normalisationFactors;
-}
-
-void LinearClassifier::loadNormalisationFactors(QVector<FeatureSet> trainData)
-{
-    assert(trainData.size() > 0);
-    const size_t dimensions = trainData[0].getFeatureCount();
-
-    normalisationFactors = new double[dimensions];
-
-    for(size_t i = 0; i < dimensions; i++)
-        normalisationFactors[i] = -1.0;
-
-    for(size_t i = 0; i < (size_t)trainData.size(); i++)
-    {
-        FeatureSet& s = trainData[i];
-
-        QVector<Feature> features = s.getFeatures();
-        for(size_t j = 0; j < dimensions; j++)
-        {
-            assert(features[j] >= 0.0);
-            normalisationFactors[j] = std::max<double>(features[j], normalisationFactors[j]);
-        }
-    }
-
-    for(size_t i = 0; i < dimensions; i++)
-        if(normalisationFactors[i] <= 0.0)
-            throw std::runtime_error(std::string("Column ") + boost::lexical_cast<std::string>(i) + " does not contain any useful information (always 0.0)");
 }
 
 problem LinearClassifier::loadProblem(QVector<FeatureSet> trainData)
 {
     problem prob;
-
-    loadNormalisationFactors(trainData);
 
     prob.y = TYPEDCALLOC(int, trainData.size());
     for(size_t i = 0; i < (size_t)trainData.size(); i++)
@@ -75,7 +42,7 @@ problem LinearClassifier::loadProblem(QVector<FeatureSet> trainData)
 
         assert(prob.n == features.size());
         for(size_t j = 0; j < (size_t)features.size(); j++)
-            nodeArray[j] = {(int)j+1, features[j] / normalisationFactors[j]};
+            nodeArray[j] = {(int)j+1, features[j]};
 
         nodeArray[features.size()].index = -1;
         prob.x[i] = nodeArray;
@@ -119,12 +86,10 @@ Probability LinearClassifier::predict(FeatureSet testVector)
     if(m == nullptr)
         throw std::runtime_error("First train on a dataset or load an existing model, before predicting");
 
-    assert(normalisationFactors != nullptr);
-
     feature_node* x = TYPEDCALLOC(feature_node, testVector.getFeatureCount()+1);
     QVector<Feature> features = testVector.getFeatures();
     for(size_t i = 0; i < (size_t)features.size(); i++)
-        x[i] = {(int)i+1, features[i] / normalisationFactors[i]};
+        x[i] = {(int)i+1, features[i]};
 
     x[features.size()].index = -1;
 
