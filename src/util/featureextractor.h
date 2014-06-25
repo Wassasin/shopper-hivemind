@@ -28,11 +28,12 @@ public:
 private:
     QVector<Feature> extractFeatures(const Client &client);
     int findOfferDepartment(const Client &client, const Offer &offer);
-    QPair<int, int> countTrips(const Client &client);
-    QPair<float, float> calcOfferRatio(const Client &client, const Offer &offer);
-    QPair<QPair<bool, bool>, int> calcPurchaseInfo(const Client &client, const Offer &offer, const Id &offerDept);
-    QPair<int, int> countReturns(const Client &client, const Offer &offer);
-    bool isOfferItem(const Basketitem &item, const Offer &offer);
+
+    QVector<Feature> calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept);
+    QVector<Feature> countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept);
+
+    int signum(float f);
+    int signum(uint64_t f);
 
     QHash<Id, Offer> offers;
 

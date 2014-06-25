@@ -3,9 +3,13 @@
 #include <memory>
 #include <boost/program_options.hpp>
 
+#include <QDebug>
+
 #include "typedefs.h"
 
 #include "classifier.h"
+#include "util/normaliser.h"
+#include "util/measures.h"
 #include "linearclassifier.h"
 
 #include "outputwriter.h"
@@ -22,6 +26,12 @@ namespace Hivemind
         Cli(Cli&) = delete;
         Cli& operator=(Cli&) = delete;
 
+        enum class ClassifierType
+        {
+            SVM,
+            LINEAR
+        };
+
         struct Options
         {
             bool generate_cache = false;
@@ -30,6 +40,7 @@ namespace Hivemind
             bool debug = false;
             bool train = false;
             std::string datadir = "./data";
+            ClassifierType classifier = ClassifierType::SVM;
         };
 
         static bool askConfirmation()
@@ -51,6 +62,8 @@ namespace Hivemind
 
         static int interpret(Options& opt, int argc, char** argv)
         {
+            std::string classifierString = "";
+
             boost::program_options::options_description o_general("General options");
             o_general.add_options()
             ("help,h", "display this message")
@@ -58,7 +71,8 @@ namespace Hivemind
             ("clear-cache,p", "clears cache files (will ask for confirmation)")
             ("debug,t", "use small debug subset, for code testing purposes")
             ("force,f", "will never ask confirmation, answer [YES] to everything")
-            ("datadir,d", boost::program_options::value<decltype(opt.datadir)>(&opt.datadir), "specify in which directory to search for the data files (default ./data)");
+            ("datadir,d", boost::program_options::value<decltype(opt.datadir)>(&opt.datadir), "specify in which directory to search for the data files (default ./data)")
+            ("algorithm,a", boost::program_options::value(&classifierString), "{svm, linear} (defaults to svm)");
 
             boost::program_options::variables_map vm;
             boost::program_options::positional_options_description pos;
@@ -110,27 +124,21 @@ namespace Hivemind
                 return 1;
             }
 
+            if(classifierString == "svm" || classifierString == "")
+                opt.classifier = ClassifierType::SVM;
+            else if(classifierString == "linear")
+                opt.classifier = ClassifierType::LINEAR;
+            else
+            {
+                std::cerr << "Unrecognized classifier \"" << classifierString << "\"" << std::endl;
+                return 1;
+            }
+
             return 0;
         }
 
-        static int act(const Options& opt)
+        static void useLinearClassifier(const Options& opt, Dataset& d)
         {
-            Cache::checkDatadir(opt.datadir);
-
-            if(opt.clear_cache)
-            {
-                if(!opt.force)
-                {
-                    std::cerr << "You are about to clear a very costly cache, continue? (y/n) ";
-                    if(!askConfirmation())
-                        return 1;
-                }
-
-                Dataset::clearCache(opt.datadir);
-            }
-
-            Dataset d(opt.datadir, opt.generate_cache, opt.debug);
-
             auto readers = d.getRealReaders();
 
             {
@@ -151,23 +159,29 @@ namespace Hivemind
 
                     std::cerr << "Built trainData" << std::endl;
 
+                    Normaliser n(trainData);
+                    n.normalise(trainData);
+                    n.saveModel("model.norm");
+
                     c.train(trainData);
 
                     std::cerr << "Trained" << std::endl;
-                    //c.saveModel("model.data");
                 }
 
                 {
                     auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
                     FeatureExtractor f(*rOffer);
-                    //Classifier c;
-                    //c.loadModel("model.data");
+
+                    Normaliser n("model.norm");
+
                     QVector<DataRow> output;
 
                     Client testClient;
                     while(readers.rTestClients->read(testClient))
                     {
-                        Probability p = c.predict(f.createFeatureSet(testClient));
+                        FeatureSet feat = f.createFeatureSet(testClient);
+                        n.normalise(feat);
+                        Probability p = c.predict(feat);
                         output.append(DataRow(testClient.id, p));
                     }
 
@@ -177,6 +191,109 @@ namespace Hivemind
                 }
 
                 std::cerr << result << std::endl;
+            }
+        }
+
+        static void useSVMClassifier(const Options& opt, Dataset& d)
+        {
+            auto readers = d.getRealReaders();
+
+            {
+                size_t result = 0;
+                {
+                    auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
+                    QVector<FeatureSet> trainData;
+                    FeatureExtractor f(*rOffer);
+
+                    TrainClient trainClient;
+                    while(readers.rTrainClients->read(trainClient))
+                    {
+                        auto features = f.createFeatureSet(trainClient);
+                        if(features.getFeatureCount() != 0)
+                            trainData.append(features);
+                    }
+
+                    std::cerr << "Built trainData" << std::endl;
+
+//                    int featureCount = 0;
+//                    for (FeatureSet fs : trainData) {
+//                        Measures m(fs.getFeatures());
+//                        qDebug() << "---\nFeature " << (featureCount++);
+//                        qDebug() << "\nMean: " << m.getMean();
+//                        qDebug() << "\nMin : " << m.getMin();
+//                        qDebug() << "\nMax : " << m.getMax();
+//                        qDebug() << "\nVar : " << m.calculateVariance();
+//                        qDebug() << "\nDev : " << m.calculateDeviation();
+//                        qDebug() << "\n";
+//                    }
+
+                    Classifier c;
+                    Normaliser n(trainData);
+                    n.normalise(trainData);
+                    n.saveModel("model.norm");
+
+                    c.train(trainData);
+
+                    std::cerr << "Trained" << std::endl;
+                    c.saveModel("model.data");
+                }
+
+                {
+                    auto rOffer(Cache::getFastestReader<Offer>("offers", opt.datadir));
+                    FeatureExtractor f(*rOffer);
+
+                    Classifier c;
+                    Normaliser n("model.norm");
+                    c.loadModel("model.data");
+
+                    QVector<DataRow> output;
+
+                    Client testClient;
+                    while(readers.rTestClients->read(testClient))
+                    {
+                        FeatureSet feat = f.createFeatureSet(testClient);
+                        n.normalise(feat);
+                        Probability p = c.predict(feat);
+                        output.append(DataRow(testClient.id, p));
+                    }
+
+                    OutputWriter writer("output.csv");
+                    writer.write(output);
+
+                }
+
+                std::cerr << result << std::endl;
+            }
+        }
+
+        static int act(const Options& opt)
+        {
+            Cache::checkDatadir(opt.datadir);
+
+            if(opt.clear_cache)
+            {
+                if(!opt.force)
+                {
+                    std::cerr << "You are about to clear a very costly cache, continue? (y/n) ";
+                    if(!askConfirmation())
+                        return 1;
+                }
+
+                Dataset::clearCache(opt.datadir);
+            }
+
+            Dataset d(opt.datadir, opt.generate_cache, opt.debug);
+
+            switch(opt.classifier)
+            {
+            case ClassifierType::SVM:
+                useSVMClassifier(opt, d);
+                break;
+            case ClassifierType::LINEAR:
+                useLinearClassifier(opt, d);
+                break;
+            default:
+                throw std::logic_error("Unknown ClassifierType");
             }
 
             return 0;
@@ -189,7 +306,6 @@ namespace Hivemind
             int result = interpret(opt, argc, argv);
             if(result != 0)
                 return result;
-
             return act(opt);
         }
     };

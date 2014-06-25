@@ -1,6 +1,7 @@
 # Qt stuff
 *.pro*
 *.autosave
+*.orig
 
 # CMake stuff
 CMakeLists.txt.user*

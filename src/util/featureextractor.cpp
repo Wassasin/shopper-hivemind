@@ -29,35 +29,17 @@ namespace Hivemind
     }
 
     QVector<Feature> FeatureExtractor::extractFeatures(const Client &client) {
-        QVector<Feature> features;
-        features.reserve(10);
-
         Offer offer = offers.value(client.offer);
-
-        //features.append(offer.brand); // The brand of the offer
-        features.append(offer.offervalue); // The offer value
-
         Id offerDept = findOfferDepartment(client, offer);
-        if(offerDept == -1)
-            return QVector<Feature>();
-        //features.append(offerDept); // The deparment of the offer
 
-        QPair<int, int> tripsInfo = countTrips(client);
-        features.append(tripsInfo.first); // Number of visits to a chain *before* receiving the offer
-        //features.append(tripsInfo.second); // Number of visits to a chain *after* receiving the offer
+        QVector<Feature> features;
 
-        QPair<float, float> offerInfo = calcOfferRatio(client, offer);
-        features.append(offerInfo.first); // The ratio offer : allItems for the number of unique items per basket, averaged over all baskets
-        features.append(offerInfo.second); // The ratio offer : allItems for the total value of the items per basket, averaged over all baskets
+//      features.append(offer.quantity); // Quantity is useless
+        features.append(offer.offervalue);
 
-        QPair<QPair<bool, bool>, int> purchaseInfo = calcPurchaseInfo(client, offer, offerDept);
-        features.append(purchaseInfo.first.first); // Whether the client has bought the offer's product before receiving the offer
-        features.append(purchaseInfo.first.second); // Whether the client has bought the offer's brand and department before receiving the offer
-        //features.append(purchaseInfo.second); // The number of days that elapsed before the client redeemed the offer (-1 if never)
+        features += calcPurchaseRatios(client, offer, offerDept);
 
-        QPair<int, int> returnInfo = countReturns(client, offer);
-        features.append(returnInfo.first); // The number of times the client has returned something
-        features.append(returnInfo.second); // The number of times the client has return the offer's brand
+        features += countPurchasesAndReturns(client, offer, offerDept);
 
         return features;
     }
@@ -66,86 +48,104 @@ namespace Hivemind
     int FeatureExtractor::findOfferDepartment(const Client &client, const Offer &offer) {
         foreach (Basket basket, client.baskets)
             foreach (Basketitem item, basket.items)
-                if (isOfferItem(item, offer))
+                if (item.brand == offer.brand && item.company == offer.company && item.category == offer.category)
                     return item.dept;
         return -1;
     }
 
-    /** Returns (tripsBeforeOffer, tripsAfterOffer) */
-    QPair<int, int> FeatureExtractor::countTrips(const Client &client) {
-        QSet<Date> datesBefore;
-        QSet<Date> datesAfter;
-        foreach(Basket basket, client.baskets) {
-            if (basket.date < client.offerDate)
-                datesBefore.insert(basket.date);
-            else
-                datesAfter.insert(basket.date);
-        }
-        return qMakePair(datesBefore.size(), datesAfter.size());
-    }
-
-    /** Returns (offerItemRatio, offerValueRatio) */
-    QPair<float, float> FeatureExtractor::calcOfferRatio(const Client &client, const Offer &offer) {
-        float totalItemCount = 0;
-        float totalItemValue = 0;
-        float totalOfferCount = 0;
-        float totalOfferValue = 0;
+    /** Returns the ratio ABCD amount : total amount, with ABCD being Brand/Category/Company/Department or a combination of those. */
+    QVector<Feature> FeatureExtractor::calcPurchaseRatios(const Client &client, const Offer &offer, const Id &offerDept) {
+        QVector<Feature> counts(12);
 
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
-                if(item.purchaseamount <= 0)
+                if(item.purchaseamount <= 0 || item.purchasequantity <= 0)
                     continue;
-                totalItemCount += 1;
-                totalItemValue += item.purchaseamount;
 
-                if (isOfferItem(item, offer)) {
-                    totalOfferCount += 1;
-                    totalOfferValue += item.purchaseamount;
-                }
+                bool brand = item.brand == offer.brand;
+                bool category = item.category == offer.category;
+                bool company = item.company == offer.company;
+                bool dept = item.dept == offerDept;
+
+                counts[0] += item.purchaseamount * brand;
+                counts[1] += item.purchaseamount * category;
+                counts[2] += item.purchaseamount * company;
+                counts[3] += item.purchaseamount * dept;
+                counts[4] += item.purchaseamount * (brand && category);
+                counts[5] += item.purchaseamount * (brand && company);
+                counts[6] += item.purchaseamount * (brand && dept);
+                counts[7] += item.purchaseamount * (brand && company && category);
+                counts[8] += item.purchaseamount * (brand && company && dept);
+                counts[9] += item.purchaseamount * (company && category);
+                counts[10]+= item.purchaseamount * (company && dept);
+                counts[11]+= item.purchaseamount;
             }
         }
 
-        return qMakePair(totalOfferCount / totalItemCount, totalOfferValue / totalItemValue);
+        for (int i = 0; i < counts.size(); ++i)
+            counts[i] /= counts.last();
+        counts.resize(counts.size() - 1);
+
+        return counts;
     }
 
-    /** Returns ((boughtOfferBefore, boughtBrandBefore), delay) */
-    QPair<QPair<bool, bool>, int> FeatureExtractor::calcPurchaseInfo(const Client &client, const Offer &offer, const Id &offerDept) {
-        bool boughtOfferBefore = false;
-        bool boughtBrandCategoryBefore = false;
+     /**
+      * Returns a vector of purchased/returned-ABCDCount, with ABCD being Brand/Category/Company/Department
+      * or a combination of those. The number of purchase and return trips is also included.
+      * All above is done for a number of days between the offer date and the item purchase date.
+      */
+    QVector<Feature> FeatureExtractor::countPurchasesAndReturns(const Client &client, const Offer &offer, const Id &offerDept) {
+        const int DAY_COUNT = 8;
+        const int FEATURE_COUNT = 12 * DAY_COUNT;
+
+        const int days[DAY_COUNT] = { 1000000, 360, 180, 150, 120, 90, 60, 30 };
+
+        QVector<Feature> counts(FEATURE_COUNT * 2); // Feature count is for purchase only, we need to double it to make room for returns
 
         foreach (Basket basket, client.baskets) {
             foreach (Basketitem item, basket.items) {
-                if (isOfferItem(item, offer)) {
-                    if (basket.date >= client.offerDate)
-                        return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), (int)client.offerDate.daysTo(basket.date));
-                    else
-                        boughtOfferBefore = true;
+                if (signum(item.purchaseamount) != signum(item.purchasequantity))
+                    continue; // Noise
+
+                bool brand = item.brand == offer.brand;
+                bool category = item.category == offer.category;
+                bool company = item.company == offer.company;
+                bool dept = item.dept == offerDept;
+
+                int index = item.purchaseamount >= 0 ? 0 : FEATURE_COUNT;
+                for (int i = 0; i < DAY_COUNT; ++i) {
+                    if (basket.date.daysTo(client.offerDate) > days[i])
+                        break;
+
+                    counts[index++] += brand;
+                    counts[index++] += category;
+                    counts[index++] += company;
+                    counts[index++] += dept;
+                    counts[index++] += brand && category;
+                    counts[index++] += brand && company;
+                    counts[index++] += brand && dept;
+                    counts[index++] += brand && company && category;
+                    counts[index++] += brand && company && dept;
+                    counts[index++] += company && category;
+                    counts[index++] += company && dept;
+                    counts[index++]++;
                 }
-                if (item.brand == offer.brand && item.dept == offerDept)
-                    boughtBrandCategoryBefore = true;
             }
         }
-        return qMakePair(qMakePair(boughtOfferBefore, boughtBrandCategoryBefore), -1);
+
+        return counts;
     }
 
-    /** Returns (totalReturns, brandReturns) */
-    QPair<int, int> FeatureExtractor::countReturns(const Client &client, const Offer &offer) {
-        int returnTotalCount = 0;
-        int returnBrandCount = 0;
-
-        foreach (Basket basket, client.baskets) {
-            foreach (Basketitem item, basket.items) {
-                if (item.purchaseamount < 0) {
-                    returnTotalCount++;
-                    if (item.brand == offer.brand)
-                        returnBrandCount++;
-                }
-            }
-        }
-        return qMakePair(returnTotalCount, returnBrandCount);
+    int FeatureExtractor::signum(float f) {
+        if (f > 0) return +1;
+        if (f < 0) return -1;
+        return 0;
     }
 
-    bool FeatureExtractor::isOfferItem(const Basketitem &item, const Offer &offer) {
-        return item.brand == offer.brand && item.category == offer.category && item.company == offer.company;
+    int FeatureExtractor::signum(uint64_t f) {
+        if (f > 0) return +1;
+        if (f < 0) return -1;
+        return 0;
     }
+
 }
