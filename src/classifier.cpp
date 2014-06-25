@@ -59,7 +59,7 @@ void Classifier::train(QVector<FeatureSet> trainData, bool cross_validate)
 
     param = new svm_parameter;
     param->svm_type = C_SVC;
-    param->kernel_type = LINEAR;
+    param->kernel_type = RBF;
     param->gamma = 0.5; // Not used
     param->degree = 2; // Not used
     param->cache_size = 100; // cache_size is the size of the kernel cache, specified in megabytes, No idea
