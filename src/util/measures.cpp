@@ -1,6 +1,7 @@
 #include "measures.h"
 
 #include<cfloat>
+#include <QVector>
 
 namespace Hivemind
 {
@@ -21,7 +22,7 @@ float Measures::calculateVariance()
     double mean = calculateMean();
     for (Feature f : featureCol)
         sumDiff += pow(f - mean, 2);
-    return sumDiff / featureCol.length();
+	return sumDiff / featureCol.size();
 }
 
 float Measures::getMean()
@@ -59,7 +60,7 @@ float Measures::calculateMean()
     double sum = 0.0;
     for (Feature f : featureCol)
         sum += f;
-    return sum / featureCol.length();
+	return sum / featureCol.size();
 }
 
 }
