@@ -12,7 +12,18 @@ include_directories(SYSTEM ${msgpack_INCLUDE_DIRS})
 find_package(svm REQUIRED)
 include_directories(SYSTEM ${svm_INCLUDE_DIRS})
 
-find_package(linear REQUIRED)
+
+include(ExternalProject)
+
+add_custom_target(
+   liblinear
+   COMMAND make lib
+   WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/../contrib/liblinear"
+)
+
+set(linear_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}/../contrib/liblinear")
+set(linear_LIBRARIES "${PROJECT_SOURCE_DIR}/../contrib/liblinear/liblinear.so.1")
+
 include_directories(SYSTEM ${linear_INCLUDE_DIRS})
 
 find_package(Qt5Core REQUIRED)
@@ -22,3 +33,5 @@ add_executable(shopper-hivemind ${shopper-hivemind_SOURCES} ${shopper-hivemind_H
 qt5_use_modules(shopper-hivemind Core)
 include_directories(.)
 target_link_libraries(shopper-hivemind ${Boost_LIBRARIES} ${msgpack_LIBRARIES} ${QT_LIBRARIES} ${svm_LIBRARIES} ${linear_LIBRARIES})
+
+add_dependencies(shopper-hivemind liblinear)
