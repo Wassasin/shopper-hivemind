@@ -18,6 +18,7 @@ public:
     QVector<Feature> getFeatures();
     int getFeatureCount() const;
     Prediction getTargetValue();
+    void scaleFeatures(const QVector<Feature> vector);
 private:
     QVector<Feature> features;
     Prediction targetValue;
