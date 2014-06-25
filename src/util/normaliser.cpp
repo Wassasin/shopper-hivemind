@@ -9,12 +9,15 @@ namespace Hivemind
 
 Normaliser::Normaliser(QVector<FeatureSet> trainData)
 {
+    QVector<bool> useValues;
     for(FeatureSet s : trainData)
     {
         QVector<Feature> features = s.getFeatures();
         if(!features.isEmpty())
         {
             maxValues.resize(features.size());
+            useValues.resize(features.size());
+            useValues.fill(false);
             break;
         }
     }
@@ -27,11 +30,19 @@ Normaliser::Normaliser(QVector<FeatureSet> trainData)
 
         for(int i = 0; i < features.size(); i++)
             if(features.at(i) > maxValues.at(i))
+            {
+                if(maxValues.at(i) != 0)
+                    useValues[i] = true;
                 maxValues[i] = features.at(i);
+            }
     }
 
     for(int i = 0; i < maxValues.size(); i++)
+    {
         maxValues[i] = 1. / maxValues.at(i);
+        if(!useValues[i])
+            maxValues[i] = 0;
+    }
 }
 
 Normaliser::Normaliser(QString filename)
@@ -64,12 +75,7 @@ void Normaliser::saveModel(QString filename)
 
 void Normaliser::normalise(FeatureSet &data)
 {
-    int i = 0;
-    for(Feature &f : data.getFeatures())
-    {
-        f *= maxValues.at(i++);
-        Q_ASSERT(f>0);
-    }
+    data.scaleFeatures(maxValues);
 }
 
 void Normaliser::normalise(QVector<FeatureSet> &data)
