@@ -101,10 +101,12 @@ First of all, libSVM is really slow. Of course we are dealing with a huge data s
 
 And indeed, the performance was better: libLinear trained a model in roughly one hour, and testing the same $150000$ data points only took $x$ minutes. However when we submitted the resulting output to Kaggle, the accuracy of our estimation was lower than with libSVM.
 
-\section{Results}
 
+\section{Results \& Discussion}
+With LibSVM we scored 0.56619 on Kaggle. Using LibLinear we only reached 0.52422.
 
-\section{Discussion}
+\vspace{1em}
+
 It's a pitty we didn't score very well on the leaderboard, but it means that there is plenty of room for improvement. First of all, we did not have the time left in the end to tune the parameters of our used machine learning methods for better performance. We probably could have scored better if we tuned these parameters a bit.
 
 Secondly, we chose to develop our program in C++ with Qt, which caused quite some delay. Not only because not everyone in our group was familiar with C++/Qt, but also because we needed to write a lot of code for ourself and lost a lot of time getting libraries to work on our systems. We chose C++/Qt because we wanted to implement a fast way of handling such a large dataset, but maybe we could have better used pythons machine learning tools at the cost of some performance. These tools are used a lot by the machine learning community and are known to work with all kinds of algorithms and datasets. It wouldn't have cost this much work to get everything to work and would've given us more time to optimize the machine learning part.
