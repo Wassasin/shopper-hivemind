@@ -64,7 +64,21 @@
 
 
 \section{Classification}
+\subsection{Algorithms}
+For this project we've experimented with a number of different (variants of) algorithms. The two `main' algorithms we've been looking at are Support Vector Machines and Vowpal Wabbit. Our experiences with the latter weren't that good. Although some contestants on Kaggle say that they have got some convincing results out of it (and very fast, since Vowpal Wabbit has a run time linear in the number of data points), we haven't been able to get it to work at all. We feel the Wabbit-library is still very `academic', by which we mean it is hard to install and configure the library and to get it to work with your own code. This did not really convince us of the quality of the library. We then decided to leave it for what it was and continue with libSVM and libLinear.
+\subsection{Implementation}
+We then moved on and continued working on classification with Support Vector Machines. The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimised than the linear kernel found in libSVM.
 
+With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of livSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \emph{NaN} everywhere. However, once this was fixed we got a more promising output.
+
+We used libSVM with the \emph{C\_SVC} SVM-type and an \emph{RBF}-kernel. The value of \emph{C} was $10$, and we did not use the built-in shrinking methods.
+
+By default, libSVM only assigns a (binary) class to each data point that you test. However, for this project we not only needed to indicate if a client would become a repeat buyer, but we needed to give a \emph{probability} that the client would return. Luckily, libSVM offers method to generate a model with probability information during training. Unfortunately, this is really slow. As a compromise between this, we do not ask libSVM to build a model with probabilities. Instead, we ask for the internal decision value and use that instead of a real probability. Although these are different numbers, they give the same \emph{area under the curve} and thus this would not influence our score.
+
+\subsection{Performance}
+First of all, libSVM is really slow. Of course we are dealing with a huge data set here. Training the data model however takes the whole night, and testing $150000$ data points takes almost two hours. We tried to run the same analysis, but then using libLinear instead of libSVM. LibLinear is an optimised version of the linear kernel for support vector machines. It was made by the same authors as libSVM, and has a similar API.
+
+And indeed, the performance was better: libLinear trained a model in roughly one hour, and testing the same $150000$ data points only took $x$ minutes. However when we submitted the resulting output to Kaggle, the accuracy of our estimation was lower than with libSVM.
 
 \section{Results}
 
