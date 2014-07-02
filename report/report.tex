@@ -21,8 +21,9 @@
 	\hrule
 	\vspace{0.4cm}
 	\textbf{\huge Acquire Valued Shoppers Challenge}\\[0.4cm]
+	\textbf{\huge Team Shopper-Hivemind}\\[0.4cm]
 	\hrule
-	\vspace{2cm}
+	\vspace{1cm}
 	\begin{minipage}[t]{0.45\textwidth}
 	\begin{flushleft} \large
 	Wouter Geraerdts\\
@@ -42,7 +43,7 @@
 	\vspace{.7cm}
 	
 	\begin{abstract}
-		ABSTRACT HIERZO
+		We participated in Kaggle's competition \emph{Acquire Valued Shoppers Challenge} for the last assignment of Machine Learning in Practice, at the Radboud University Nijmegen. In this competition you are asked to provide a classification algorithm that is able to predict whether a customer of some store will become a repeat buyer after receiving and redeeming an offer. To solve this challenging problem, we used Support Vector Machines, implemented in \emph{libSVM}, and \emph{libLINEAR}, a linear classification library. We found that the former performs not so well in terms of computation time, but does beat the much faster linear classification algorithm of \emph{libLINEAR} in terms of accuracy. At the time of writing, we do not know our accuracy on all of the test data (Kaggle does not publish these results before the competition has ended), but we scored $0.56619$ on approximately 20\% of the test data.
 	\end{abstract}
 	\vspace{.7cm}
 
@@ -65,7 +66,23 @@ We have chosen this competition because we wanted to experiment what it was like
 
 
 \section{Features}
+We divided feature generation in two chunks: feature extraction and feature normalisation. The former stage gives us a big matrix containing 227 features per client, whilst the latter transforms these features into a format the libraries we use can use.
 
+\subsection{Feature Extraction}
+To extract useful features, we need to understand the way the data set is built up and how each of the three files (\texttt{history}, \texttt{transactions}, and \texttt{offers}) related to one another. Each client has a single history file, and all clients have received a single offer. Next to this, we have at least a year of shopping history per client. Since client id's do not have to be unique over all store chains, each transaction can be linked to the client that did the transaction by the client id and the store chain id. We assume that a client does not go to the same store chain multiple times on a single day, which allows us to describe the set of items bought by a client on the same day as a `basket'. The number of baskets equals the number of trips the client has made. Unfortunately, the data set does contain some noise. For example, there are cases where the number of items bought is positive, but the value of these items negative, or the other way around. During feature extraction we ignore these inconsistencies and pretend as if the entry does not exist.
+
+All of our features can be roughly divided in four categories. We have the offer-category, the purchases-category, the ratio-category, and the faithfulness-category.
+
+The former of the four contains all features that are directly related to the offer a client gets. In our case, we have chosen to use only the offer value and the offer quantity. These two values are the only two continuous values of the offer. The other ones, the category, company, and brand may be relevant to whether or not a client becomes a repeat buyer after redeeming the offer, but since these are absolute values (id's), we have chosen to use these attributes only in relation to the client's purchase history.
+
+A client's purchase history is the most powerful `tool' we could use to generate features. It contains a detailed description of what the client has purchased and returned the last period, and when he or she has. We used this history to generate several bins of features. Each bin contains the same features, except for an other period. The first bin contains the purchases and returns of a client for the last month, second one for the last two months, and so on. After we have reached the last half a year of the client's purchases and returns, we add the same data for the last year, and for `ever'. This gives us a total of 8 bins per client. As for the features per bin: each bin contains the number of items that a client has bought and returned, that meet a certain condition. This conditions are related to the offer the client has received; we map `parts' of the offer to the client's history and create our conditions based on that: ``has the client ever bought something of the brand of the offer?'' Or ``has the client ever bought something at this company?'' We combine these attributes to get a total of eleven features: \emph{brand}, \emph{category}, \emph{company}, \emph{department}, \emph{brand} and \emph{category}, \emph{brand} and \emph{company}, \emph{brand} and \emph{department}, \emph{brand} and \emph{company} and \emph{category}, \emph{brand} and \emph{company} and \emph{department}, \emph{company} and \emph{category}, and \emph{company} and \emph{department}. To these features, we add one more feature, being the number of times the client has bought (c.q. returned) anything at all. This gives use a total of twelve features, for both purchases and returns, per bin. With 8 bins per client, this makes a total of $8\cdot24=192$ features. Note that not all possible combinations are included per bin. This is due to the fact that some combinations are rather senseless. For example, anything requiring the product to be of both the offer product's category and department. Since one category is always of the same department, this would not provide us with any new information. Also note that we, initially, only know the brand, the category, and the company of the offer. We do not know the department, but if the client has ever bought the offer's product before, we can figure out the department of the offer.
+
+The eleven features that we get from checking whether a client has bought an item that meats one of the twelve constraints, are reused when calculating ratios. These ratios are useful to determine if a client buys the same (type of) item regularly, or if the client buys at the same company regularly, or if one of those (twelve) things differ from day to day, so to speak. We find the totals as described above, and divide these by the total number of times a client has bought anything at all. Thereby obtaining ratios, which we use as extra features.
+
+The last set of features contains the `faithfulness' of a client within a given context, i.e. the number of $X$ per $Y$. This is an attempt to find out if a client can be pulled towards a certain offer of a certain company. For example, assume a client goes to two different companies. At one of these companies, he usually buys a very diverse set of products, a set covering many brands and categories. Yet, at the other company, he always purchases a product in the same category, or the same department, or of the same brand. The latter company might find that interesting to know, as such a client is more likely to redeem an offer that fits in his regular purchase pattern. For these features, we look at the number of: \emph{brands}, \emph{companies}, and \emph{categories} per \emph{department}, \emph{departments}, \emph{companies}, and \emph{categories} per \emph{brand}, \emph{brands}, \emph{companies}, and \emph{categories} per \emph{company}, and \emph{brands} and \emph{companies} per category. Again, we have left out redundant combinations. We count this for both purchases and returns, giving us another 22 features to use. 
+
+\subsection{Feature Normalisation}
+The libraries we use do not just accept any values in the feature sets, and some features will only make the classifying library slower. To prevent this, we transform our features. First, we remove all features that have the same value for every customer. For most features this is not the case, but some are. For example, as we were engineering our features, we found that none of the test clients has bought a product in the month before receiving the offer. By removing these features, we prevent further complications. The next thing we do is normalising all features. This is required as libSVM only accepts continuous features of which each value is in the range $[0,1]$. We normalise by dividing each feature value by the highest value any client has for that feature. This leaves us with a set of features most classification libraries will accept.
 
 \section{Classification}
 \subsection{Algorithms}
