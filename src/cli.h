@@ -215,18 +215,22 @@ namespace Hivemind
 
                     std::cerr << "Built trainData" << std::endl;
 
-//                    int rowCount = 0;
-//                    for (FeatureSet fs : trainData) {
-//                        std::cout << fs.getFeatureCount() << std::endl;
-//                        Measures m(fs.getFeatures());
-//                        qDebug() << "---Row " << (rowCount++);
-//                        qDebug() << "\nMean: " << m.getMean();
-//                        qDebug() << "\nMin : " << m.getMin();
-//                        qDebug() << "\nMax : " << m.getMax();
-//                        qDebug() << "\nVar : " << m.calculateVariance();
-//                        qDebug() << "\nDev : " << m.calculateDeviation();
-//                        qDebug() << "\n";
-//                    }
+                    int colCount = 0;
+                    QVector<QVector<Feature>> dataCols(trainData.first().getFeatureCount());
+                    for (FeatureSet fs : trainData) {
+                        int i = 0;
+                        for (Feature f : fs.getFeatures())
+                            dataCols[i++].append(f);
+                    }
+                    for (QVector<Feature> v : dataCols) {
+                        Measures m(v);
+                        qDebug() << "---\nRow " << (colCount++);
+                        qDebug() << "Mean: " << m.getMean();
+                        qDebug() << "Min : " << m.getMin();
+                        qDebug() << "Max : " << m.getMax();
+                        qDebug() << "Var : " << m.calculateVariance();
+                        qDebug() << "Dev : " << m.calculateDeviation();
+                    }
 
                     Classifier c;
                     Normaliser n(trainData);
