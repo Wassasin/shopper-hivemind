@@ -25,8 +25,8 @@
 	\vspace{2cm}
 	\begin{minipage}[t]{0.45\textwidth}
 	\begin{flushleft} \large
-	Wouter Geraerdts\\
-	sXXXXXX\\[0.7cm]
+	Wouter Geraedts\\
+	s0814857\\[0.7cm]
 	Matthijs Hendriks\\
 	s4068459\\[0.7cm]
 	\end{flushleft}
@@ -59,6 +59,58 @@
 
 \section{Approach}
 
+The Acquire Valued Shoppers Challenge requires a very specific kind of machine
+learning due to the large dataset. Loading the entire set in memory requires
+specialized equipment, which we had access to. This approach makes analyzing 
+this dataset not particulary convenient.
+
+This challenge was approached in a typical manner: first a basic pipeline was
+implemented in order to enable rapid incremental improvements. The trainingset
+was split in three subsets (train, test and tuning) in order to measure the
+classification performance. Then we could add, analyze and prune new features.
+Also a few classification algorithms were tried and their parameters tuned.
+
+The \texttt{shopper-hivemind} application features a streaming pipeline for
+converting the raw CSV dataset into relational objects. These objects are
+subsequently fed to the feature extractor. A feature matrix is generated,
+normalized and then fitted by a classifier. This classifier can then immediately
+be used to predict test data.
+
+\subsection{Dataset loading}
+
+The original dataset is 30GiB of raw CSV. Because loading this dataset took a
+quite some time when implemented in Python, we decided to use C++ instead.
+Loading this data is implemented as a streaming set of readers. This means that
+during this phase only a single data row is in memory.
+
+\begin{itemize}
+    \item The Gzipped CSV file is read to a simple datarecord.
+    \item These datarecords are cached in an intermediate bytepacked file, in the
+        \emph{Msgpack}\footnote{\url{http://msgpack.org/}} format (also Gzipped).
+    \item Subsequently these datarecords are linked together to form complex
+        relational dataobjects, and are again cached in a Gzipped Msgpack file.
+        These files use roughly 2.4GiB of diskspace.
+        % Graph of datastructures (?)
+    \item Finally feature extraction is performed on each object.
+\end{itemize}
+
+These cache files are stored in and read directly from a Gzipped state. Without
+compression the disk throughput bottlenecked the loading of the dataset. The
+required bandwidth even outclassed the performance of some consumergrade SSD's.
+This approach solves that problem, at the cost of some CPU time.
+
+Most classification algorithms require the features to be presented as an
+in-memory feature matrix. Luckily our feature matrix is only 1.4GiB, which fits
+in the memory of most modern machines.
+
+Finally a method for creating uniformly distributed subsets of the dataset was
+implemented. We used a single split for training, testing and tuning. Also a
+1000 row subset was created for debugging and rapid prototyping.
+
+In practice we did not use cross validation actively, nor did we measure our
+performance using this tuning and testset. Because fitting the models took quite
+some time, we only measured our performance by predicting the final test set and
+submitting the entry to Kaggle.
 
 \section{Features}
 
