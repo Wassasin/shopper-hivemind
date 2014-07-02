@@ -50,7 +50,7 @@ void FeatureSet::scaleFeatures(const QVector<Feature> vector)
 
         Feature &f = it.value();
         f *= vector.at(i++);
-        Q_ASSERT(f>=0);
+        if(f<0) f = 0;
     }
 }
 
