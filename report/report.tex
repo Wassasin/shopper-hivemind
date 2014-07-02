@@ -90,7 +90,7 @@ For this project we've experimented with a number of different (variants of) alg
 \subsection{Implementation}
 We then moved on and continued working on classification with Support Vector Machines. The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimised than the linear kernel found in libSVM.
 
-With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of livSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \emph{NaN} everywhere. However, once this was fixed we got a more promising output.
+With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of livSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \texttt{NaN} everywhere. However, once this was fixed we got a more promising output.
 
 We used libSVM with the \emph{C\_SVC} SVM-type and an \emph{RBF}-kernel. The value of \emph{C} was $10$, and we did not use the built-in shrinking methods.
 
