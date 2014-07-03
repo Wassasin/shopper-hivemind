@@ -57,11 +57,11 @@
 \newpage
 
 \section{Introduction}
-For this final assignment for Machine Learning in Practice, we chose the \emph{Acquire Valued Shoppers Challenge} from Kaggle\footnote{https://www.kaggle.com/c/acquire-valued-shoppers-challenge}. The goal for this competition is to find out which shoppers will become regular buyers of a certain product after receiving a personalized coupon offer. This data is useful for stores so they can make a relavant offer to their clients at the checkout.
+For this final assignment for Machine Learning in Practice, we chose the \emph{Acquire Valued Shoppers Challenge} from Kaggle\footnote{https://www.kaggle.com/c/acquire-valued-shoppers-challenge}. The goal for this competition is to find out which shoppers will become regular buyers of a certain product after receiving a personalized coupon offer. This data is useful for stores so they can make a relevant offer to their clients at the checkout.
 
 The dataset is composed of several files: a file with offers, with transactions, and a history file for both the train set and test set. Each row in the history files corresponds to a single customer and a redeemed offer. For the trainHistory file also whether this client has become a regular buyer or not is given. The offer can be related to an entry in the offers file, detailing the responsible company, the featured product and the given discount. For every customer there is at least one year of transactions given, recorded before an offer was made. A transaction record includes a product category, company, department and brand as well a information about the product bought, such as the size, quantity and amount.
 
-We have chosen this competition because we wanted to experiment with a dataset of this size and because it relates well to applications from the industry. We cuold also relate to the dataset, as we ourselves are avid supermarket visitors. The prize money attached to the competition also attracted us somewhat.
+We have chosen this competition because we wanted to experiment with a dataset of this size and because it relates well to applications from the industry. We could also relate to the dataset, as we ourselves are avid supermarket visitors. The prize money attached to the competition also attracted us somewhat.
 
 \section{Approach}
 
@@ -71,7 +71,7 @@ specialized equipment, which we had access to. This approach makes analyzing
 this dataset not particularly convenient.
 
 This challenge was approached in a typical manner: first a basic pipeline was
-implemented in order to enable rapid incremental improvements. The trainingset
+implemented in order to enable rapid incremental improvements. The training set
 was split in three subsets (train, test and tuning) in order to measure the
 classification performance. Then we could add, analyze and prune new features.
 Also a few classification algorithms were tried and their parameters tuned.
@@ -114,12 +114,12 @@ implemented. We used a single split for training, testing and tuning. Also a
 1000 row subset was created for debugging and rapid prototyping.
 
 In practice we did not use cross validation actively, nor did we measure our
-performance using this tuning and testset. Because fitting the models took quite
+performance using this tuning and test set. Because fitting the models took quite
 some time, we only measured our performance by predicting the final test set and
 submitting the entry to Kaggle.
 
 \section{Features}
-We divided feature generation in two chunks: feature extraction and feature normalisation. The former stage gives us a big matrix containing 227 features per client, whilst the latter transforms these features into a format the libraries we use can use.
+We divided feature generation in two chunks: feature extraction and feature normalization. The former stage gives us a big matrix containing 227 features per client, whilst the latter transforms these features into a format the libraries we use can use.
 
 \subsection{Feature Extraction}
 To extract useful features, we need to understand the way the data set is built up and how each of the three files (\texttt{history}, \texttt{transactions}, and \texttt{offers}) are related to one another. Each client has a single history file, and all clients have received a single offer. Additionally we have at least a year of shopping history per client. Since client id's do not have to be unique over all store chains, each transaction can be linked to the client that did the transaction by the client id and the store chain id. We assume that a client does not go to the same store chain multiple times on a single day, which allows us to describe the set of items bought by a client on the same day as a `basket'. The number of baskets equals the number of trips the client has made. Unfortunately, the data set does contain some noise. For example, there are cases where the number of items bought is positive, but the value of these items negative, or the other way around. During feature extraction we ignore these inconsistencies and pretend as if the entry does not exist.
@@ -134,23 +134,23 @@ The eleven features that we get from checking whether a client has bought an ite
 
 The last set of features contains the `faithfulness' of a client within a given context, i.e. the number of $X$ per $Y$. This is an attempt to find out if a client can be pulled towards a certain offer of a certain company. For example, assume a client goes to two different companies. At one of these companies, he usually buys a very diverse set of products, a set covering many brands and categories. Yet, at the other company, he always purchases a product in the same category, or the same department, or of the same brand. The latter company might find that interesting to know, as such a client is more likely to redeem an offer that fits in his regular purchase pattern. For these features, we look at the number of: \emph{brands}, \emph{companies}, and \emph{categories} per \emph{department}, \emph{departments}, \emph{companies}, and \emph{categories} per \emph{brand}, \emph{brands}, \emph{companies}, and \emph{categories} per \emph{company}, and \emph{brands} and \emph{companies} per category. Again, we have left out redundant combinations. We count this for both purchases and returns, giving us another 22 features to use. 
 
-\subsection{Feature Normalisation}
-The libraries we use do not just accept any values in the feature sets, and some features will only make the classifying library slower. To prevent this, we transform our features. First, we remove all features that have the same value for every customer. For most features this is not the case, but some are. For example, as we were engineering our features, we found that none of the test clients has bought a product in the month before receiving the offer. By removing these features, we prevent further complications. The next thing we do is normalising all features. This is required as libSVM only accepts continuous features of which each value is in the range $[0,1]$. We normalise by dividing each feature value by the highest value any client has for that feature. This leaves us with a set of features most classification libraries will accept.
+\subsection{Feature Normalization}
+The libraries we use do not just accept any values in the feature sets, and some features will only make the classifying library slower. To prevent this, we transform our features. First, we remove all features that have the same value for every customer. For most features this is not the case, but some are. For example, as we were engineering our features, we found that none of the test clients has bought a product in the month before receiving the offer. By removing these features, we prevent further complications. The next thing we do is normalizing all features. This is required as libSVM only accepts continuous features of which each value is in the range $[0,1]$. We normalize by dividing each feature value by the highest value any client has for that feature. This leaves us with a set of features most classification libraries will accept.
 
 \section{Classification}
 \subsection{Algorithms}
 For this project we've experimented with a number of different (variants of) algorithms. The two `main' algorithms we've been looking at are Support Vector Machines and Vowpal Wabbit. Our experiences with the latter weren't that good. Although some contestants on Kaggle say that they have got some convincing results out of it (and very fast, since Vowpal Wabbit has a run time linear in the number of data points), we haven't been able to get it to work at all. We feel the Wabbit-library is still very `academic', by which we mean it is hard to install and configure the library and to get it to work with your own code. This did not really convince us of the quality of the library. We then decided to leave it for what it was and to continue with libSVM and libLinear.
 \subsection{Implementation}
-The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimised than the linear kernel found in libSVM.
+The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimized than the linear kernel found in libSVM.
 
-With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of livSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \texttt{NaN} everywhere. However, once this was fixed we got a more promising output.
+With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of libSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \texttt{NaN} everywhere. However, once this was fixed we got a more promising output.
 
 We used libSVM with the \emph{C\_SVC} SVM-type and an \emph{RBF}-kernel. The value of \emph{C} was $10$, and we did not use the built-in shrinking methods.
 
 By default, libSVM only assigns a (binary) class to each data point that you test. However, for this project we not only needed to indicate if a client would become a repeat buyer, but we needed to give a \emph{probability} that the client would return. Luckily, libSVM offers method to generate a model with probability information during training. Unfortunately, this is really slow. As a compromise between this, we do not ask libSVM to build a model with probabilities. Instead, we ask for the internal decision value and use that instead of a real probability. Although these are different numbers, they give the same \emph{area under the curve} and thus this would not influence our score.
 
 \subsection{Performance}
-First of all, libSVM is really slow. Of course we are dealing with a huge data set here. Training the data model however takes the whole night, and testing $150000$ data points takes almost two hours. We tried to run the same analysis, but then using libLinear instead of libSVM. LibLinear is an optimised version of the linear kernel for support vector machines. It was made by the same authors as libSVM, and has a similar API.
+First of all, libSVM is really slow. Of course we are dealing with a huge data set here. Training the data model however takes the whole night, and testing $150000$ data points takes almost two hours. We tried to run the same analysis, but then using libLinear instead of libSVM. LibLinear is an optimized version of the linear kernel for support vector machines. It was made by the same authors as libSVM, and has a similar API.
 
 And indeed, the performance was better: libLinear trained a model in roughly 52 minutes. However when we submitted the resulting output to Kaggle, the accuracy of our estimation was lower than with libSVM.
 
