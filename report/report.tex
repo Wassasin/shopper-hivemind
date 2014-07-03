@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[a4paper]{jmlr}
 
 \usepackage[UKenglish]{babel}
 \usepackage{graphicx}
@@ -44,7 +44,7 @@
 	\vspace{.7cm}
 	
 	\begin{abstract}
-		We participated in Kaggle's competition \emph{Acquire Valued Shoppers Challenge} for the last assignment of Machine Learning in Practice, at the Radboud University Nijmegen. In this competition you are asked to provide a classification algorithm that is able to predict whether a customer of some store will become a repeat buyer after receiving and redeeming an offer. To solve this challenging problem, we used Support Vector Machines, implemented in \emph{libSVM}, and \emph{libLINEAR}, a linear classification library. We found that the former performs not so well in terms of computation time, but does beat the much faster linear classification algorithm of \emph{libLINEAR} in terms of accuracy. At the time of writing, we do not know our accuracy on all of the test data (Kaggle does not publish these results before the competition has ended), but we scored $0.56619$ on approximately 20\% of the test data.
+		We participated in Kaggle's competition \emph{Acquire Valued Shoppers Challenge} for the last assignment of Machine Learning in Practice, at the Radboud University Nijmegen. In this challenge the contestants are asked to provide a classification algorithm that is able to predict whether a customer of some store will become a repeat buyer after receiving and redeeming an offer. To solve this challenging problem, we used Support Vector Machines, implemented in \emph{libSVM}, and \emph{libLINEAR}. We found that the former performs not so well in terms of computation time, but does beat the much faster linear classification algorithm of \emph{libLINEAR} in terms of accuracy. At the time of writing, we do not know our accuracy on all of the test data (Kaggle does not publish these results before the competition has ended), but we scored $0.56619$ on approximately 20\% of the test data.
 	\end{abstract}
 	\vspace{.7cm}
 
@@ -59,9 +59,9 @@
 \section{Introduction}
 For this final assignment for Machine Learning in Practice, we chose the \emph{Acquire Valued Shoppers Challenge} from Kaggle\footnote{https://www.kaggle.com/c/acquire-valued-shoppers-challenge}. The goal for this competition is to find out which shoppers will become regular buyers of a certain product after receiving a personalized coupon offer. This data is useful for stores so they can make a relavant offer to their clients at the checkout.
 
-The dataset contains a few tables which contain information about the previous transactions and the offers. There is also trainHistory file which contain information about an offer as presented to a customer including the outcome: whether this client has become a regular buyer or not. An offers file gives you more information about the offers: the company, department etc. are stored there. For every customer there is at least one year of transactions given, recorded before an offer was made, which allows us to have a complete image of the buyers history. Transaction information includes a product category, company, department and brand as well a information about the product that is bought, such as the size, quantity and amount.
+The dataset is composed of several files: a file with offers, with transactions, and a history file for both the train set and test set. Each row in the history files corresponds to a single customer and a redeemed offer. For the trainHistory file also whether this client has become a regular buyer or not is given. The offer can be related to an entry in the offers file, detailing the responsible company, the featured product and the given discount. For every customer there is at least one year of transactions given, recorded before an offer was made. A transaction record includes a product category, company, department and brand as well a information about the product bought, such as the size, quantity and amount.
 
-We have chosen this competition because we wanted to experiment what it was like to work with a dataset of this size and because it also has some very common real-life applications. The challenge of processing 22 GB of data, which doesn't fit in our RAM anymore would be the biggest. It is also a nice idea that there is quite some money to win in this competition.
+We have chosen this competition because we wanted to experiment with a dataset of this size and because it relates well to applications from the industry. We cuold also relate to the dataset, as we ourselves are avid supermarket visitors. The prize money attached to the competition also attracted us somewhat.
 
 \section{Approach}
 
@@ -141,7 +141,7 @@ The libraries we use do not just accept any values in the feature sets, and some
 \subsection{Algorithms}
 For this project we've experimented with a number of different (variants of) algorithms. The two `main' algorithms we've been looking at are Support Vector Machines and Vowpal Wabbit. Our experiences with the latter weren't that good. Although some contestants on Kaggle say that they have got some convincing results out of it (and very fast, since Vowpal Wabbit has a run time linear in the number of data points), we haven't been able to get it to work at all. We feel the Wabbit-library is still very `academic', by which we mean it is hard to install and configure the library and to get it to work with your own code. This did not really convince us of the quality of the library. We then decided to leave it for what it was and to continue with libSVM and libLinear.
 \subsection{Implementation}
-We then moved on and continued working on classification with Support Vector Machines. The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimised than the linear kernel found in libSVM.
+The specific implementations that we have used are libSVM and libLinear, which are both widely used libraries for SVM. The former provides a variety of different SVM-kernels and methods, whereas the latter only supports Support Vector Machines with linear kernels, though more optimised than the linear kernel found in libSVM.
 
 With libSVM we use the sparse array representation of the data, meaning that we leave each element that is equal to zero out. According to the documentation of livSVM, this allows for faster processing of the data. What's not mentioned in the documentation is that this is hard to get right. It caused a memory-bug in our implementation, which then caused libSVM to just output \texttt{NaN} everywhere. However, once this was fixed we got a more promising output.
 
@@ -152,19 +152,18 @@ By default, libSVM only assigns a (binary) class to each data point that you tes
 \subsection{Performance}
 First of all, libSVM is really slow. Of course we are dealing with a huge data set here. Training the data model however takes the whole night, and testing $150000$ data points takes almost two hours. We tried to run the same analysis, but then using libLinear instead of libSVM. LibLinear is an optimised version of the linear kernel for support vector machines. It was made by the same authors as libSVM, and has a similar API.
 
-And indeed, the performance was better: libLinear trained a model in roughly one hour, and testing the same $150000$ data points only took $x$ minutes. However when we submitted the resulting output to Kaggle, the accuracy of our estimation was lower than with libSVM.
+And indeed, the performance was better: libLinear trained a model in roughly 52 minutes. However when we submitted the resulting output to Kaggle, the accuracy of our estimation was lower than with libSVM.
 
 
 \section{Results \& Discussion}
-With LibSVM we scored 0.56619 on Kaggle. Using LibLinear we only reached 0.52422. The training data is read in 5 minutes, after which calculation of all the features took 20 minutes. The size of the feature matrix results in 124 MiB.
+With LibSVM we scored 0.56619 on Kaggle. Using LibLinear we only reached 0.52422.
 
 \vspace{1em}
 
-It's a pitty we didn't score very well on the leaderboard, but it means that there is plenty of room for improvement. First of all, we did not have the time left in the end to tune the parameters of our used machine learning methods for better performance. We probably could have scored better if we tuned these parameters a bit.
+It's a pitty we didn't score very well on the leaderboard, but it means that there is plenty of room for improvement. First of all, we did not have the time left to tune the parameters of our used machine learning methods for better performance. We probably could have scored better if we tuned these parameters a bit.
 
-Secondly, we chose to develop our program in C++ with Qt, which caused quite some delay. Not only because not everyone in our group was familiar with C++/Qt, but also because we needed to write a lot of code for ourself and lost a lot of time getting libraries to work on our systems. We chose C++/Qt because we wanted to implement a fast way of handling such a large dataset, but maybe we could have better used pythons machine learning tools at the cost of some performance. These tools are used a lot by the machine learning community and are known to work with all kinds of algorithms and datasets. It wouldn't have cost this much work to get everything to work and would've given us more time to optimize the machine learning part.
+Secondly, we chose to develop our program in C++ with Qt, which caused quite some delay. Not only because not everyone in our group was familiar with C++/Qt, but also because we needed to write a lot of code for ourselves and lost a lot of time getting libraries to work on our systems. We chose C++/Qt because we wanted to implement a fast way of handling such a large dataset, but maybe we could have better used Python and it's machine learning tools like SKlearn at the cost of some performance. These tools are used a lot by the machine learning community and are known to work with all kinds of algorithms and datasets. It wouldn't have cost this much work to get everything to work and would've given us more time to optimize the machine learning part.
 
 Instead of using python, as suggested above, we also could've used our feature extraction toolchain in C++ and use CPython for the machine learning part, so we could use the python machine learning tools. Storing the training set into a new file after processing it using our C++ tool was also possible: this could be read using a standard python tool.
-
 
 \end{document}
