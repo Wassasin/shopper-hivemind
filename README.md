@@ -10,13 +10,16 @@ How to use
 Usage: ./shopper-hivemind [options]
 
 General options:
-  -h [ --help ]         display this message
-  -c [ --cache ]        generate cache files,  if they do not exist yet
-  -p [ --clear-cache ]  clears cache files (will ask for confirmation)
-  -t [ --debug ]        use small debug subset, for code testing purposes
-  -f [ --force ]        will never ask confirmation, answer [YES] to everything
-  -d [ --datadir ] arg  specify in which directory to search for the data files
-                        (default ./data)
+  -h [ --help ]          display this message
+  -c [ --cache ]         generate cache files,  if they do not exist yet
+  -p [ --clear-cache ]   clears cache files (will ask for confirmation)
+  -t [ --debug ]         use small debug subset, for code testing purposes
+  -f [ --force ]         will never ask confirmation, answer [YES] to 
+                         everything
+  -d [ --datadir ] arg   specify in which directory to search for the data 
+                         files (default ./data)
+  -a [ --algorithm ] arg {svm, linear} (defaults to svm)
+
 ```
 
 Dependencies
@@ -32,7 +35,7 @@ This software project uses the following packages:
 * Boost with {system, filesystem, regex, program_options, iostreams}
 * Msgpack
 * LibSVM
-* Vowpal Wabbit
+* LibLinear
 * Qt5
 
 To install the software required to compile `shopper-hivemind` on Ubuntu, use the following commands:
@@ -41,6 +44,15 @@ To install the software required to compile `shopper-hivemind` on Ubuntu, use th
 # apt-get update
 # apt-get install libboost-dev libboost-system-dev libboost-filesystem-dev libboost-regex-dev libboost-program-options-dev libboost-iostreams-dev libmsgpack-dev libsvm-dev qtbase5-dev
 ```
+
+You then still need to install `liblinear`, which can easily be downloaded by running:
+
+```
+$ git submodule sync
+$ git submodule update --init
+```
+
+See `contrib/liblinear` for details on how to build and install `liblinear`.
 
 How to build
 ============
